@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--fleet Appointment Form View-->
+    <record id="view_fleet_appointment_form" model="ir.ui.view">
+        <field name="name">fleet.appointment.form</field>
+        <field name="model">fleet.appointment</field>
+        <field name="arch" type="xml">
+            <form string="Workshop Appointment">
+                <header>
+                    <button name="button_confirm" states="draft" string="Confirm" type="object" class="oe_highlight"/>
+                    <button string="Create Job Order" states="confirm" name="%(action_fleet_advisor_nots_technician)d"
+                            context="{'default_appointment_id': active_id,}" type="action" class="oe_highlight"/>
+                    <button name="button_concel" states="confirm" string="Cancel" type="object" class="oe_highlight"/>
+
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirm,done"/>
+                </header>
+                <sheet string="Workshop Appointment">
+                    <div class="oe_title oe_left">
+                        <h1>
+                            <field name="sequence"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="coll_date" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="client_id" context="{'show_address': 1}" options='{"always_reload": True}'
+                                   attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                            <field name="client_phone" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                            <field name="complaint_date" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                            <field name="priority" widget="priority" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                        </group>
+                        <group>
+                            <field name="partner_id" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                            <field name="client_mobile" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                            <field name="company_id" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Vehicle Details">
+                            <field name="fleet_appointment_line" attrs="{'readonly': [('state', '!=', 'draft')]}">
+                                <tree editable="bottom">
+                                    <field name="fleet_id"/>
+                                    <field name="model_id"/>
+                                    <field name="license_plate"/>
+                                    <field name="vin_sn"/>
+                                    <field name="registration_no"/>
+                                </tree>
+                            </field>
+                            <separator string="Complaint Details"/>
+                            <field name="description" required="1" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                        </page>
+                        <page string="Service Advisor Nots">
+                            <separator string="Nots"/>
+                            <field name="advisor_nots" attrs="{'readonly':[('advisor_nots','!=',False)]}"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!--fleet Appointment Tree View-->
+
+    <record id="view_fleet_appointment_tree" model="ir.ui.view">
+        <field name="name">Fleet.appointment.tree</field>
+        <field name="model">fleet.appointment</field>
+        <field name="priority">4</field>
+        <field name="arch" type="xml">
+            <tree string="Fleet Appointment">
+                <field name="sequence"/>
+                <field name="client_id"/>
+                <field name="partner_id"/>
+                <field name="client_phone"/>
+                <field name="complaint_date"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_fleet_appointment_filter" model="ir.ui.view">
+        <field name="name">fleet.appointment.list.select</field>
+        <field name="model">fleet.appointment</field>
+        <field name="arch" type="xml">
+            <search string="Search Fleet Appointment">
+                <field name="sequence"/>
+                <field name="client_id"/>
+                <field name="partner_id"/>
+                <field name="client_phone"/>
+                <field name="state"/>
+            </search>
+        </field>
+    </record>
+
+
+    <!--fleet Appointment Action-->
+
+    <record model="ir.actions.act_window" id="action_fleet_appointment_tree_view">
+        <field name="name">Appointment</field>
+        <field name="res_model">fleet.appointment</field>
+        <field name="binding_view_types">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_fleet_appointment_filter"/>
+        <field name="view_id" ref="view_fleet_appointment_tree"/>
+    </record>
+
+    <!--fleet Appointment Menuitems-->
+
+    <menuitem
+            name="Appointments"
+            parent="base.menu_base_fleet_repair"
+            id="menu_fleet_appointment_menu"
+            sequence="1"
+    />
+    <menuitem
+            name="Appointment"
+            parent="menu_fleet_appointment_menu"
+            id="menu_fleet_appointment_submenu"
+            sequence="1"
+            action="action_fleet_appointment_tree_view"
+    />
+
+</odoo>
