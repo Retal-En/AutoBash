@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_fleet_purchase_requisition_form" model="ir.ui.view">
+        <field name="name">fleet.purchase.requisition.form</field>
+        <field name="model">purchase.requisition</field>
+        <field name="arch" type="xml">
+            <form string="Fleet Purchase Requisition">
+                <header>
+                    <button name="button_confirm" states="draft" string="Confirm" type="object" class="oe_highlight"/>
+                    <button name="button_department_manager" states="confirm" string="Department Manager Approved" type="object"
+                            class="oe_highlight"/>
+                    <button name="button_purchase_officer" states="department_manager" string="Purchase OfficerApproved" type="object"
+                            class="oe_highlight"/>
+                                <button name="button_purchase" string="derift" type="object"/>
+
+                    <button name="button_concel" states="confirm,department_manager" string="Cancel" type="object"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,confirm,department_manager,purchase_officer,done"/>
+                </header>
+                <sheet string="Fleet Workshop">
+                    <div class="oe_title oe_left">
+                        <h1>
+                            <field name="sequence"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="receipt_date" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="department_id"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="client_id" context="{'show_address': 1}" options='{"always_reload": True}'
+                            />
+                            <field name="purchase_type"
+                            />
+                            <field name="job_controller_id"/>
+                            <field name="user_id"/>
+
+                        </group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="supplier_quotation"
+                                   attrs="{'invisible':[('purchase_type','!=','parts_requisition')],'required':[('purchase_type','=','parts_requisition')]}"/>
+                            <field name="supplier_suggested"/>
+                            <field name="workshop_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Order Line">
+                            <field name="requisition_line_ids"
+                                   attrs="{'readonly': [('state', '!=', 'draft')]}">
+                                <tree editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="product_qty" readonly="1"/>
+                                    <field name="uom_id"/>
+                                    <field name="quantity"/>
+                                    <field name="price_unit"/>
+                                    <field name="taxes_id" widget="many2many_tags"/>
+                                    <field name="price_total"/>
+                                </tree>
+                            </field>
+
+                            <group name="note_group" col="6" class="mt-2 mt-md-0">
+                                <group class="oe_subtotal_footer oe_right" colspan="2" name="sale_total">
+                                    <field name="total" force_save="1" colspan="2"/>
+                                </group>
+                                <div class="oe_clear"/>
+                            </group>
+
+
+                        </page>
+                        <page string="RFQ Evaluation">
+                            <group>
+                                <group>
+                                    <field name="price_ratio"/>
+                                </group>
+                                <group>
+                                    <field name="quality_ratio"/>
+                                </group>
+                            </group>
+
+                        </page>
+                        <page string="Notes">
+
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <!--fleet Workshop Tree View-->
+    <record id="view_fleet_purchase_requisition_tree" model="ir.ui.view">
+        <field name="name">fleet.purchase.requisition.tree</field>
+        <field name="model">purchase.requisition</field>
+        <field name="arch" type="xml">
+            <tree string="Fleet Workshop">
+                <field name="sequence"/>
+                <field name="client_id"/>
+                <field name="phone"/>
+                <field name="receipt_date"/>
+                <field name="purchase_type"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+    <record id="view_purchase_requisition_order_filter" model="ir.ui.view">
+        <field name="name">fleet.purchase.requisition.list.select</field>
+        <field name="model">purchase.requisition</field>
+        <field name="arch" type="xml">
+            <search string="Search Purchase Requisition Order">
+                <field name="sequence"/>
+                <field name="client_id" operator="child_of"/>
+                <field name="fleet_id"/>
+                <separator/>
+            </search>
+        </field>
+    </record>
+    <record id="view_purchase_requisition_order_pivot" model="ir.ui.view">
+        <field name="name">fleet.workshop.list.pivot</field>
+        <field name="model">purchase.requisition</field>
+        <field name="arch" type="xml">
+            <pivot string="Purchase Requisition">
+                <field name="client_id" type="row"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!--Action-->
+    <record model="ir.actions.act_window" id="action_fleet_purchase_requisition_view">
+        <field name="name">Purchase Requisition</field>
+        <field name="res_model">purchase.requisition</field>
+        <field name="binding_view_types">form</field>
+        <field name="view_mode">tree,form,pivot</field>
+        <field name="search_view_id" ref="view_purchase_requisition_order_filter"/>
+        <field name="view_id" ref="view_fleet_purchase_requisition_tree"/>
+    </record>
+    <!--Menuitems-->
+    <menuitem name="Purchase Requisition" parent="menu_fleet_repair" id="menu_fleet_purchase_requisition_submenu"
+              sequence="2"
+              action="action_fleet_purchase_requisition_view"
+    />
+
+    <menuitem id="menu_purchase_requisition" name="Requisition Orders"
+              parent="purchase.menu_purchase_root" sequence="0"/>
+    <menuitem name="Purchase Requisition" parent="menu_purchase_requisition" id="menu_fleet_purchase_requisition"
+              sequence="1"
+              action="action_fleet_purchase_requisition_view"
+    />
+</odoo>

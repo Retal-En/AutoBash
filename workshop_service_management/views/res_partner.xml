@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!--Partner  View-->
+        <record id="wikitec_res_partner_form" model="ir.ui.view">
+            <field name="name">res.partner.view.customer</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[hasclass('oe_title')]/h1" position="replace">
+                    <h2 class="o_row row no-gutters d-flex">
+                        <div class="col">
+                            <label for="name" class="oe_edit_only"/>
+                            <div class="o_row">
+                                <field name="name" placeholder="First Name"
+                                       attrs="{'required' : [('type', '=', 'contact')]}"/>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <label for="last_name" class="oe_edit_only"/>
+                            <div class="o_row">
+                                <field name="last_name" placeholder="Last Name"/>
+                            </div>
+                        </div>
+                    </h2>
+                </xpath>
+
+                <xpath expr="//group[1]" position="after">
+                    <group string="Customer Information">
+                        <group>
+                            <field name="gender"  widget="radio" options="{'horizontal': true}"/>
+                            <field name="id_type"  widget="radio" options="{'horizontal': true}"/>
+                            <field name="insurance_companies" />
+
+                        </group>
+                        <group>
+                            <field name="age"/>
+                            <field name="partner_id" placeholder="Partner  Id"/>
+                        </group>
+                    </group>
+                </xpath>
+
+                <!-- <xpath expr="//field[@name='type']" position="after">
+                    <field name="customer_type"/>
+                    <field name="customer_code"/>
+                    <field name="vendor_code"/>
+                </xpath>
+                <xpath expr="//field[@name='category_id']" position="after">
+                    <field name="gstn"/>
+                    <field name="gstn_status"/>
+                    <field name="part_no"/>
+                </xpath> -->
+                <xpath expr="//notebook[last()]" position="inside">
+                    <page string="Bank Details">
+                        <group>
+                            <group>
+                                <field name="bank_ac_name"/>
+                                <field name="bank_ac_no"/>
+                                <field name="account_type"/>
+                            </group>
+                            <group>
+                                <field name="ifsc_code"/>
+                                <field name="branch"/>
+                            </group>
+                        </group>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+
+        <!--User View-->
+
+        <!-- <record id="wikitec_res_users_form" model="ir.ui.view">
+            <field name="name">wikitec.res.users.form</field>
+            <field name="model">res.users</field>
+            <field name="inherit_id" ref="base.view_users_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[hasclass('oe_title')]" position="replace">
+                    <div class="oe_title">
+                        <h2 class="o_row row no-gutters d-flex">
+                            <div class="col">
+                                <label for="name" class="oe_edit_only" />
+                                <div class="o_row">
+                                    <field name="name" placeholder="First Name" required="1"/>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <label for="last_name" class="oe_edit_only" />
+                                <div class="o_row">
+                                    <field name="last_name" placeholder="Last Name"/>
+                                </div>
+                            </div>
+                        </h2>
+                        <field name="email" invisible="1"/>
+                        <label for="login" class="oe_edit_only" string="Email Address"/>
+                        <h2><field name="login"/></h2>
+                        <group>
+                            <field name="partner_id" readonly="1" required="0" groups="base.group_no_one" attrs="{'invisible': [('id', '=', False)]}"/>
+                            <field name="user_type"/>
+                        </group>
+                    </div>
+                </xpath>
+            </field>
+        </record> -->
+
+        <!-- Company Form -->
+        <!-- <record id="wikitec_res_coumpany_form" model="ir.ui.view">
+            <field name="name">wikitec.res.company.form</field>
+            <field name="model">res.company</field>
+            <field name="inherit_id" ref="base.view_company_form"/>
+            <field name="arch" type="xml">
+                <field name="partner_id" position="after">
+                    <field name="company_type"/>
+                </field>
+            </field>
+        </record> -->
+
+    </data>
+</odoo>

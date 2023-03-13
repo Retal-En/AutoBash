@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_res_order_group_erp_ma,res_order_group_erp_manager,model_sale_order_approval,,1,1,1,1
+access_res_contract_group_erp_ma,res_contract_group_erp_manager,model_sale_contract,,1,1,1,1
+access_res_installment_group_erp_ma,res_installment_group_erp_manager,model_sale_installment,,1,1,1,1

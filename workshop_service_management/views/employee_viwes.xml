@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Customize hr View -->
+    <record id="hr_mechanic_work_form_view" model="ir.ui.view">
+        <field name="name">hr.mechanic.inherit</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook/page[@name='hr_settings']" position="after">
+                <page string="Mechanic Information">
+                    <group string='Mechanic Information' colspan="4" col="4">
+                        <field name="mechanic"/>
+                        <field name="mechanic_status"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+    <record id="open_view_employee_list_my_8" model="ir.actions.act_window">
+        <field name="name">Mechanic</field>
+        <field name="res_model">hr.employee</field>
+        <field name="view_mode">kanban,tree,form,activity</field>
+        <field name="domain">[('mechanic','=',True)]</field>
+        <field name="context">{'default_mechanic':True}</field>
+    </record>
+    <menuitem
+            name=" Mechanic Workorder"
+            parent="base.menu_base_fleet_repair"
+            id="menu_fleet_mechanic_menu"
+            sequence="6"
+    />
+    <menuitem
+            name="Mechanic"
+            parent="menu_fleet_mechanic_menu"
+            id="menu_fleet_mechanic_submenu"
+            sequence="1"
+            action="open_view_employee_list_my_8"
+    />
+</odoo>

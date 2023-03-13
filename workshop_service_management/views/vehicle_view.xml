@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="workshop_fleet_vehicle_form_view" model="ir.ui.view">
+            <field name="name">fleet.vehicle.inherit</field>
+            <field name="model">fleet.vehicle</field>
+            <field name="inherit_id" ref="fleet.fleet_vehicle_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='future_driver_id']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+
+                <xpath expr="//field[@name='driver_id']" position="before">
+                    <field name="autobash_ownership"/>
+                </xpath>
+
+                <xpath expr="//field[@name='driver_id']" position="after">
+                    <field name="future_driver_id"/>
+                </xpath>
+                <xpath expr="//field[@name='future_driver_id']" position="attributes">
+                    <attribute name="string">Owner</attribute>
+                </xpath>
+                <xpath expr="//field[@name='horsepower']" position="before">
+                    <field name="registration_no"/>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>
+
+
+
+
+

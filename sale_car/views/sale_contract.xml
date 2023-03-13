@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+<!-- sales Contract  -->
+
+    <record id="view_sales_contract" model="ir.ui.view">
+        <field name="name">view_sales_contract</field>
+        <field name="model">sale.contract</field>
+        <field name="arch" type="xml">
+            <form string="Car Sales Contract">
+                <header>
+                    <button string="Confirm" name="action_confirm" type="object"
+                            class="oe_highlight" attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+                        
+                    <button string="Contract is Done" name="action_done" type="object" class="oe_highlight" 
+                        attrs="{'invisible': ['|',('state', '!=', 'confirm'),('state', '=', 'done')]}"/>
+                    
+
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirm,done"/>
+                </header>
+
+                <sheet>
+                    <div class="oe_title" name="title">
+                        <h2>
+                            <field name="sequence" nolabel="1"/>
+                        </h2>
+                    </div>
+                    <group col="4">
+                        <field name="contract_date"/>
+                        <field name="contract_day_name"/>
+                    </group>
+                    <group col="4">
+                        <field name="order_reference" />
+                        <field name="company_id" />
+                        <field name="customer" />
+                        <field name="agent_company_employee" />
+                    </group>
+                    <group col="2">
+                        <field name="is_agent" />  
+                    </group>
+                    
+                    <group col="4">
+                        <field name="total_amount" />
+                        <field name="down_payment_amount" />
+                        <field name="number_of_installment" />
+                    </group>
+                  
+                    
+                    <notebook>
+                        <page string="Product">
+                            <group>
+                                <field name="product_id"/>
+                            </group>
+                        </page>
+                        <page string="Agent" attrs="{'invisible': [('is_agent', '!=', True)]}">
+                             <group col="4">
+                                <field name="agent_of_customer" attrs="{'invisible': [('is_agent', '!=', True)]}"/>
+                                <field name="poa_agent_number" attrs="{'invisible': [('is_agent', '!=', True)]}"/>
+                                <field name="poa_agent_date" attrs="{'invisible': [('is_agent', '!=', True)]}"/>
+                                <field name="poa_agent_city" attrs="{'invisible': [('is_agent', '!=', True)]}"/>
+                                <field name="lawyer_id" attrs="{'invisible': [('is_agent', '!=', True)]}"/>
+                            </group>
+                        </page>
+                        <page string="Witnesses">
+                            <group col="4" name="Witnesses">
+                                <field name="first_witness" />
+                                <field name="second_witness" />
+                                <field name="first_witness_identify" />
+                                <field name="second_witness_identify" />
+                                <field name="first_witness_id_date" />
+                                <field name="second_witness_id_date" />
+                                <field name="first_witness_id_place" />
+                                <field name="second_witness_id_place" />
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+<!-- tree -->
+    <record id="tree_sales_contact" model="ir.ui.view">
+        <field name="name">tree_sales_contract</field>
+        <field name="model">sale.contract</field>
+        <field name="arch" type="xml">
+            <tree string="Car Sales Contract">
+                <field name="sequence"/>
+                <field name="contract_date"/>
+                <field name="order_reference"/>
+                <field name="customer" />
+                <field name="state" />
+                  
+            </tree>
+        </field>
+    </record>
+
+    <!--Action-->
+    <record model="ir.actions.act_window" id="action_sales_contract">
+        <field name="name">Sales Contract</field>
+        <field name="res_model">sale.contract</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!--Menuitems-->        
+    <menuitem 
+        id="sale_contract_menu"
+        parent="sale.sale_menu_root"
+        name="Sales Contracts" 
+        sequence="50"/>
+    <menuitem 
+        name="Contracts"
+        parent="sale_contract_menu" 
+        id="sale_contract_sub_menu" 
+        sequence="3" 
+        action="action_sales_contract"/>
+   
+</odoo>

@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+    <!--PDC peyment IN -->
+        <record id="pdc_payment_form" model="ir.ui.view">
+        	<field name="name">pdc payment</field>
+        	<field name="model">pdc.payment</field>
+        	<field name="arch" type="xml">
+                <form string="PDC Payment">
+                    <header>
+                        <button string="REGISTER" name="action_registered" type="object"
+                                class="oe_highlight" attrs="{'invisible': [('state', 'not in', ['draft'])]}"/>
+                        
+                        <button string="DEPOSITED" name="action_deposited" type="object" class="oe_highlight"
+                                attrs="{'invisible': [('state', 'not in', ['registered'])]}" />
+                        <button string="DONE" name="action_done" type="object"
+                                class="oe_highlight" attrs="{'invisible': [('state', 'not in', ['deposited'])]}"/>
+                        <button string="BOUNCED" name="action_bounced" type="object"
+                                class="oe_highlight" attrs="{'invisible': [('state', 'not in', ['deposited'])]}"/>
+                        <button string="Reset To Draft" name="reset_to_draft" type="object" 
+                                attrs="{'invisible': [('state', 'not in', ['registered'])]}"/>
+                        <!-- <button string="RECONCIL" name="action_test" type="object"
+                                attrs="{'invisible': [('state', 'not in', ['done'])]}"/>
+                         -->
+
+                         <button name="%(pdc_payment_report_id)d" string='PDC Report'
+                                type='action' style="color: red;border-color:darkred"/>
+
+                        <field name="state" widget="statusbar" statusbar_colors='{"draft":"blue"}' statusbar_visible="draft,registered,deposited,done"/>
+                    </header>
+                    <sheet>
+                    
+                        <div class="oe_title" name="title">
+                            <h2>
+                                <field name="sequence" nolabel="1"/>
+                            </h2>
+                        </div>
+                        <group col="4">
+                            <field name="payment_type" widget="radio">Payment Type</field>
+                            <field name="partner_id" attrs="{'readonly':[('state','in',['done','bounced'])]}">Partner</field>
+                            <field name="payment_amount" attrs="{'readonly':[('state','in',['done','bounced'])]}">Payment Amount</field>
+                            <field name="pdc_ref" attrs="{'readonly':[('state','in',['done','bounced'])]}">Cheque Reference</field>
+                            <field name="payment_journal" attrs="{'readonly':[('state','in',['done','bounced'])]}">Payment Journal</field>
+                            
+                        </group>
+                        <group col="4">
+                            <field name="bank_journal" attrs="{'invisible': [('state', 'not in', ['deposited'])], 
+                                'required': [('state', 'in', ['deposited'])], 'readonly':[('state','in',['done','bounced'])]}">Bank Journal</field>
+                            <field name="cheque_payment_date" attrs="{'invisible': [('state', 'not in', ['deposited'])], 
+                                'required': [('state', 'in', ['deposited'])], 'readonly':[('state','in',['done','bounced'])]}">Cheque Payment Date</field>
+                        </group>
+                        <group col="4">
+                           
+                            <field name="payment_date" attrs="{'readonly':[('state','in',['done','bounced'])]}">Payment Date</field>
+                            <field name="due_date" attrs="{'readonly':[('state','in',['done','bounced'])]}">Due Date</field>
+                            <field name="memo">Memo</field>
+                            <field name="bank">Bank</field>
+                        </group>
+                        <notebook>
+                            <page string="Attachments">
+                                <field name="attachment_ids" widget="many2many_binary" string="Attach a file"
+                                       nolabel="1" colspan="2" attrs="{'readonly':[('state','in',['done','bounced'])]}"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>	
+        	</field>
+        </record>
+
+    <!--PDC Payment Tree-->
+        <record id="pdc_payment_tree" model="ir.ui.view">
+            <field name="name">PDC Payment</field>
+            <field name="model">pdc.payment</field>
+            <field name="arch" type="xml">
+                <tree string="PDC Payment">
+                    <field name="sequence"/>
+                    <field name="partner_id"/>
+                    <field name="payment_amount"/>
+                    <field name="payment_type"/>
+                    <field name="payment_date"/>
+                    <field name="pdc_ref"/>
+                    <field name="bank"/>
+                    <field name="cheque_payment_date"/>   
+                    <field name="due_date"/>
+                    <field name="state" widget="badge" 
+                        decoration-success = "state == 'done'" 
+                        decoration-info = "state in ('registered','draft')"
+                        decoration-warning = "state == 'deposited'"
+                        decoration-muted = "state == 'cancelled'"
+                        decoration-danger = "state == 'bounced'"
+                        />
+                </tree>
+            </field>
+        </record>
+
+    <!--PDC Payment calendar-->
+        <record id="pdc_payment_view_calendar" model="ir.ui.view">
+            <field name="name">pdc.payment.calendar</field>
+            <field name="model">pdc.payment</field>
+            <field eval="2" name="priority"/>
+            <field name="arch" type="xml">
+                <calendar string="PDC Payment" date_start="due_date" event_open_popup="true" mode="month" color="state" quick_add="False">
+                    <field name="partner_id"/>
+                    <field name="payment_type"/>
+                    <field name="bank"/>
+                    <field name="state" widget="badge" 
+                        decoration-success = "state == 'done'" 
+                        decoration-info = "state in ('registered','draft')"
+                        decoration-warning = "state == 'deposited'"
+                        decoration-muted = "state == 'cancelled'"
+                        decoration-danger = "state == 'bounced'"/>
+                </calendar>
+            </field>
+        </record>
+
+    <!-- Action IN-->
+        <record model="ir.actions.act_window" id="pdc_payment_receive_action">
+            <field name="name">Income PDC Payment</field>
+            <field name="res_model">pdc.payment</field>
+            <field name="context">{'default_payment_type':'receive'}</field>
+            <field name="domain">[('payment_type', '=', 'receive')]</field>
+            <field name="view_mode">tree,form,calendar</field>
+            <field name="view_id" ref="pdc_payment_form"/>
+            <field name="view_id" ref="pdc_payment_tree"/>
+        </record>
+
+    <!-- menu items -->
+        <menuitem
+                id="in_pdc_payment_menu"
+                name="Income PDC Payment"
+                parent="account.menu_finance_receivables"
+                action="pdc_payment_receive_action"
+                sequence="5"/>
+
+<!-- installment menu items in sales  -->
+    <menuitem
+                id="in_pdc_payment_installment_menu"
+                name="Installments PDC"
+                parent="sale_car.sale_installment_menu"
+                action="pdc_payment_receive_action"
+                sequence="5"/>
+
+     <!-- Action OUT-->
+        <record model="ir.actions.act_window" id="pdc_payment_send_action">
+            <field name="name">Out PDC Payment</field>
+            <field name="res_model">pdc.payment</field>
+            <field name="view_mode">tree,form,calendar</field>
+            <field name="context">{'default_payment_type':'send'}</field>
+            <field name="domain">[('payment_type', '=', 'send')]</field>
+            <field name="view_id" ref="pdc_payment_form"/>
+            <field name="view_id" ref="pdc_payment_tree"/>
+        </record>
+
+    <!-- menu items PDC OUT-->
+        <menuitem
+                id="out_pdc_payment_menu"
+                name="Outgoing PDC Payment"
+                parent="account.menu_finance_payables"
+                action="pdc_payment_send_action"
+                sequence="5"/>
+
+   <!-- ====================================================================================================================================================================================================================================================================================================================================              -->
+
+    <!-- account journal add is pdc field -->
+   <record id="view_is_pdc" model="ir.ui.view">
+        <field name="name">view_is_pdc</field>
+        <field name="model">account.journal</field>
+        <field name="inherit_id" ref="account.view_account_journal_form" />
+        <field name="arch" type="xml">
+            <!-- <field name="type" position="after">
+                <field name="is_pdc" />    
+            </field> -->
+            <xpath expr="//group/field[@name='type']" position="after">
+                <field name="is_pdc" /> 
+                <!-- <group col="1" attrs="{'invisible': [('is_pdc', '!=', True)]}"> -->
+                    <field name="payment_debit_account_id"/>
+                    <field name="payment_credit_account_id"/>
+                <!-- </group> -->
+
+            </xpath>
+        </field>
+    </record>
+
+</data>
+</odoo>

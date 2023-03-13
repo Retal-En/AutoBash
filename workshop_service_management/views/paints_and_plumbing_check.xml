@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--fleet Appointment Form View-->
+    <record id="view_fleet_paints_and_plumbing_form" model="ir.ui.view">
+        <field name="name">fleet.quality.analysis.form</field>
+        <field name="model">fleet.quality.analysis</field>
+        <field name="arch" type="xml">
+            <form string="Workshop Quality Analysis">
+                <header>
+                    <button name="button_confirm" states="draft" string="Confirm" type="object" class="oe_highlight"/>
+                    <button name="button_draft" states="draft" string="Confirm" type="object" class="oe_highlight"/>
+                    <button name="button_concel" states="confirm" string="Cancel" type="object" class="oe_highlight"/>
+
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,diagnosis,done"/>
+                </header>
+                <sheet string="Workshop Quality">
+                    <!--                    -->
+                    <div class="oe_title oe_left">
+                        <h1>
+                            <field name="sequence"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <field name="request_date" readonly="1"/>
+                    </group>
+                    <group col="4">
+                        <field name="fleet_id"/>
+                        <field name="license_plate"/>
+                        <field name="vin_sn"/>
+                        <field name="model_id"/>
+                        <field name="fuel_type"/>
+                        <field name="quality_type" readonly="1"/>
+                        <field name="user_id"/>
+
+                    </group>
+
+                    <!--                    -->
+                    <notebook>
+                        <page string="Quality  Analysis Details">
+                            <field name="quality_analysis_line" attrs="{'readonly': [('state', '!=', 'draft')]}">
+                                <tree editable="bottom">
+                                    <field name="quality_id" domain="[('quality_type', '=', 'paints_and_plumbing')]"/>
+                                    <field name="check"/>
+                                    <field name="nots"/>
+                                </tree>
+                            </field>
+
+                        </page>
+                    </notebook>
+
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!--fleet Appointment Tree View-->
+    <record id="view_fleet_quality_paints_and_plumbing_analysis_list_tree" model="ir.ui.view">
+        <field name="name">fleet.quality.analysis.tree</field>
+        <field name="model">fleet.quality.analysis</field>
+        <field name="priority">4</field>
+        <field name="arch" type="xml">
+            <tree string="Fleet Quality Analysis">
+                <field name="fleet_id"/>
+                <field name="model_id"/>
+                <field name="license_plate"/>
+                <field name="fuel_type"/>
+                <field name="quality_type"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_fleet_quality_paints_and_plumbing_analysis_filter" model="ir.ui.view">
+        <field name="name">fleet.quality.analysis.select</field>
+        <field name="model">fleet.quality.analysis</field>
+        <field name="arch" type="xml">
+            <search string="Search Fleet Quality">
+                <field name="fleet_id"/>
+                <field name="model_id"/>
+                <field name="license_plate"/>
+                <field name="fuel_type"/>
+                <field name="quality_type"/>
+                <field name="state"/>
+            </search>
+        </field>
+    </record>
+
+
+    <!--fleet Appointment Action-->
+
+    <record model="ir.actions.act_window" id="action_fleet_fleet_paints_and_plumbing_quality_analysis">
+        <field name="name">Car Plumbing </field>
+        <field name="res_model">fleet.quality.analysis</field>
+        <field name="context">{'default_quality_type':'paints_and_plumbing'}</field>
+        <field name="domain">[('quality_type','=','paints_and_plumbing')]</field>
+
+        <field name="binding_view_types">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_fleet_quality_paints_and_plumbing_analysis_filter"/>
+        <field name="view_id" ref="view_fleet_quality_paints_and_plumbing_analysis_list_tree"/>
+    </record>
+    <!--fleet Appointment Menuitems-->
+
+    <menuitem
+            name="Paints and Plumbin"
+            parent="menu_fleet_quality_menu"
+            id="menu_fleet_paints_and_plumbing_submenu"
+            sequence="3"
+            action="action_fleet_fleet_paints_and_plumbing_quality_analysis"/>
+</odoo>

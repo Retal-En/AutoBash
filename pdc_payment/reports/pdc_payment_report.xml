@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <report
+            id="pdc_payment_report_id"
+            model="pdc.payment"
+            string="PDC Report"
+            name="pdc_payment.pdc_payment_report_templete_id"
+            report_type="qweb-pdf"
+    />
+
+    <template id="pdc_payment_report_templete_id">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page" style="padding: 10px;margin-right: 100px;">
+                        <header>
+                            <span>Date :
+                                <span t-field="o.date"/>
+                            </span>
+                            <br/>
+                            <h4 style="text-align: center">
+                                <!-- <span t-field="o.name" style="font-weight: bold;"/> -->
+                            </h4>
+                            <h5 style="text-align: center">==============</h5>
+                            <br/>
+                        </header>
+
+                        <h6 style="font-weight: bold;">Frist:</h6>
+                        <h6>Name of the decision and its entry into force:-</h6>
+
+                        <p style="margin-right: 100px;">It called the decision
+                            <!-- <span t-field="o.name" style="font-weight: bold;"/> -->
+                        </p>
+                        <table class="table table-condensed" style="border: 1px solid Darkblue;
+                                                                border-collapse: collapse;">
+                            <!-- <h6 style="font-weight: bold;">Second:</h6>
+                            <h6>The committee consists of the following names:-</h6> -->
+                            <thead>
+                                <tr style="background:#DCDCDC">
+                                    <th class="text-left">
+                                        <strong>Name</strong>
+                                    </th>
+                                    <th class="text-left">
+                                        <strong>Position</strong>
+                                    </th>
+
+                                </tr>
+                            </thead>
+                            <tbody style="color: #D8F0DA
+                            background: transparent">
+
+                                <!-- <tr t-foreach="o.request_approvals_ids" t-as="rec"> -->
+                                <tr t-as="rec">
+                                    <td class="text-left">
+                                        <span t-field="rec.due_date"/>
+                                    </td>
+                                    <td class="text-left">
+                                        <span t-field="rec.partner_id"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                     <!--    <h6 style="font-weight: bold;">Therd:</h6>
+                        <h6>The committee Tasks:-</h6>
+                        <br/>
+                        <span t-field="o.committee_task"/> -->
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>
