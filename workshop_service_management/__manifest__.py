@@ -8,7 +8,7 @@
                 Worksheet for repair or service of vehicles
                 Multiple essential reports""",
     "description": """Workshop-Service-Wash-Repair Management""",
-    'depends': ['sale_management', 'account', 'sale_stock', 'fleet',  'contacts', 'purchase', 'hr','sale_car','pdc_payment'],
+    'depends': ['sale_management', 'account', 'sale_stock', 'fleet',  'contacts', 'purchase', 'hr','sale_car','pdc_payment','crm'],
     'author': 'Preciseways',
     'version': '15.0.0',
     'category': 'Industries',
@@ -42,6 +42,7 @@
         'views/stock_picking.xml',
         'views/sale_order_viwe.xml',
         'views/vehicle_view.xml',
+        'views/crm_lead.xml',
         # 'views/quality_analysis.xml',
         # 'views/quality_analysis2.xml',
             'report/report_action.xml',

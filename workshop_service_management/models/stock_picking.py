@@ -59,26 +59,26 @@ class SparePartRequest(models.Model):
 
                          })
 
-        # values_for_create = {
-        #     'location_id': self.location_id.id,
-        #     'location_dest_id': self.location_des_id.id,
-        #     'partner_id': self.partner_id.id,
-        #     'spare_request_id': self.id,
-        #     'origin': self.name,
-        #     'picking_type_id': self.stock_picking_id.id,
-        #     'move_ids_without_package': [(0, 0, {
-        #         # 'spare_request_line_id': rec.id,
-        #         'location_id': self.location_id.id,
-        #         'location_dest_id': self.location_des_id.id,
-        #         'product_id': line.product_id.id,
-        #         'name': line.product_id.name,
-        #         'product_uom': line.product_id.uom_id.id,
-        #         'product_uom_qty': line.quantity_done,
-        #     }) for line in self.spare_ids.filtered(lambda r:r.quantity_done > 0)]
-        #
-        # }
-        #     # rec.write({'state': 'approved'})
-        # self.env['stock.picking'].sudo().create(values_for_create)
+        values_for_create = {
+            'location_id': self.location_id.id,
+            'location_dest_id': self.location_des_id.id,
+            'partner_id': self.partner_id.id,
+            'spare_request_id': self.id,
+            'origin': self.name,
+            'picking_type_id': self.stock_picking_id.id,
+            'move_ids_without_package': [(0, 0, {
+                # 'spare_request_line_id': rec.id,
+                'location_id': self.location_id.id,
+                'location_dest_id': self.location_des_id.id,
+                'product_id': line.product_id.id,
+                'name': line.product_id.name,
+                'product_uom': line.product_id.uom_id.id,
+                'product_uom_qty': line.quantity_done,
+            }) for line in self.spare_ids.filtered(lambda r:r.quantity_done > 0)]
+
+        }
+        self.write({'state': 'approved'})
+        self.env['stock.picking'].sudo().create(values_for_create)
 
     def action_spare_part_order_cancel(self):
         for rec in self:
@@ -125,17 +125,19 @@ class FleetStockPicking(models.Model):
         source_id = self.spare_request_id.source_id
         workshop = self.env['fleet.workshop']
         record = super(FleetStockPicking, self).button_validate()
-        if self.move_ids_without_package:
-            workshop_id = workshop.browse(source_id.id)
+        self.spare_request_id.write({'state': 'done'})
+        return record
+        # if self.move_ids_without_package:
+            # workshop_id = workshop.browse(source_id.id)
             # raise  UserError(_(workshop_id.id))
-            line_ids = []
-            for line in self.move_ids_without_package:
-                if line and line.quantity_done > 0.0:
-                    line_ids.append((0, 0, {
-                        'product_id': line.product_id.id or False,
-                        'uom_id': line.product_uom.id or False,
-                        'quantity': line.quantity_done
-                    }))
+            # line_ids = []
+            # for line in self.move_ids_without_package:
+            #     if line and line.quantity_done > 0.0:
+            #         line_ids.append((0, 0, {
+            #             'product_id': line.product_id.id or False,
+            #             'uom_id': line.product_uom.id or False,
+            #             'quantity': line.quantity_done
+            #         }))
                     # line_ids.append({
                     #     'product_id': line.product_id.id,
                     #     'workorder_id': workshop_id.id,
@@ -146,7 +148,7 @@ class FleetStockPicking(models.Model):
                     #     'uom_id':lin.product_uom.id,
                     #     'quantity':lin.quantity_done
                     # })
-            vals = {'spare_part_ids': line_ids}
+            # vals = {'spare_part_ids': line_ids}
             # work = self.env['spare.part.line']
             # azam = work.create({
             #             'product_id': 1,
@@ -157,7 +159,7 @@ class FleetStockPicking(models.Model):
             #     raise UserError(_(azam.id))
             # else:
             #     raise UserError(_('Error'))
-            workshop_id.write(vals)
+            # workshop_id.write(vals)
             # raise  UserError(_(workshop))
             # if workshop_id:
             #     raise UserError(_(workshop.id))
@@ -165,8 +167,8 @@ class FleetStockPicking(models.Model):
             #     raise UserError(_('Error'))
             # raise UserError(_(azam))
 
-        self.spare_request_id.write({'state': 'done'})
-        return record
+        # self.spare_request_id.write({'state': 'done'})
+        # return record
 
 
 class FleetStockMove(models.Model):

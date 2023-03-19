@@ -6,23 +6,25 @@
         <field name="arch" type="xml">
             <form string="Fleet Workshop">
                 <header>
-                    <button name="button_confirm" states="draft" type="object" string="Start  Repair"
+                    <button name="button_repair"  type="object" string="Start  Repair" states="repar ,reception"
                             class="oe_highlight"/>
-                    <button name="print_quotation" string="Print Job Card" type="object" states="draft,confirm"
+                    <button name="print_job_card" string="Print Job Card" type="object" states="repar,reception"
                             class="oe_highlight"/>
-                    <button name="button_approve" states="confirm" type="object" string="Approve Order"
+<!--                    <button name="button_approve"  type="object" string="Reception"-->
+<!--                            class="oe_highlight"/>-->
+<!--                    <button name="action_create_invoice" states="completed" string="Create Bill" type="object"-->
+<!--                            class="oe_highlight"/>-->
+                    <button name="button_followup"  string="Follow up" type="object"
                             class="oe_highlight"/>
-                    <button name="action_create_invoice" states="completed" string="Create Bill" type="object"
-                            class="oe_highlight"/>
-                    <button name="button_draft" string="Set to Draft" type="object"/>
-                    <button string="Quality Check" states="in_progress" name="%(action_fleet_quality_check)d"
+<!--                    <button name="button_draft" string="Set to Draft" type="object"/>-->
+                    <button string="Quality Check"  name="%(action_fleet_quality_check)d"
                             context="{'default_workshop_id': active_id}" type="action" class="oe_highlight"/>
 
-                    <button name="button_cancel" string="Cancel" type="object"/>
-                    <button name="button_done" type="object" string="Order Done"/>
+                    <button name="button_cancel" string="Cancel" type="object"  states="repar,reception"/>
+<!--                    <button name="button_done" type="object" string="Order Done"/>-->
 
                     <field name="state" widget="statusbar"
-                           statusbar_visible="confirm,to_approve,in_progress,quality_check,completed"/>
+                           statusbar_visible="confirm,reception,repar,quality_check,delivery_invoicing,follow_up,closed"/>
                 </header>
                 <sheet string="Fleet Workshop">
                     <div class="oe_button_box" name="button_box">
@@ -101,10 +103,11 @@
                                 </tree>
                             </field>
                         </page>
+<!--                        attrs="{'readonly': [('state', '!=', 'draft')]}-->
                         <page string="Job Tasks">
-                            <field name="task_line" attrs="{'readonly': [('state', '!=', 'draft')]}">
+                            <field name="task_line">
                                 <tree editable="bottom">
-                                    <field name="user_id"/>
+                                    <field name="user_id" />
                                     <field name="product_id"/>
                                     <field name="price_unit"/>
                                     <field name="taxes_id" widget="many2many_tags"/>
@@ -180,17 +183,17 @@
                         </page>
 
                         <page string="Make a external service">
-                                 <button name="action_create_external_service" string="External Service"
+                            <button name="action_create_external_service" string="External Service"
                                     confirm="Are you sure that you need to create external service............ ?"
                                     type="object" class="oe_highlight"/>
 
                             <field name="external_order_line"
                                    attrs="{'readonly': [('state', '!=', 'draft')]}">
                                 <tree editable="bottom">
-                                    <field name="vendor_id" />
+                                    <field name="vendor_id"/>
                                     <field name="product_id" readonly="1"/>
                                     <field name="name"/>
-<!--                                    <field name="uom_id" readonly="1"/>-->
+                                    <!--                                    <field name="uom_id" readonly="1"/>-->
                                     <field name="quantity"/>
                                     <field name="price_unit"/>
                                     <field name="expected_time"/>

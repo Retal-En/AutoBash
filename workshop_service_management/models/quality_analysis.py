@@ -20,6 +20,8 @@ class FleetQualityAnalysis(models.Model):
                                 help='License plate number of the vehicle (ie: plate number for a car)')
     vin_sn = fields.Char('Chassis Number', help='Unique number written on the vehicle motor (VIN/SN number)')
     model_id = fields.Many2one('fleet.vehicle.model', 'Model', help='Model of the vehicle')
+    model_year = fields.Char(string="Model Year ")
+
     quality_type = fields.Selection([
         ('car', 'Car'),
         ('spare_check', 'Spare Check'),
@@ -45,7 +47,6 @@ class FleetQualityAnalysis(models.Model):
                 'quality.analysis') or _('New')
         res = super(FleetQualityAnalysis, self).create(vals)
         return res
-
     def button_confirm(self):
         pass
 
@@ -62,10 +63,16 @@ class FleetQualityAnalysisLine(models.Model):
 
     analysis_id = fields.Many2one('fleet.quality.analysis', string='quality analysis')
     check = fields.Boolean(string="Check")
-    quality_id = fields.Many2one('fleet.quality', string='Check Name')
+    quality_id = fields.Many2one('fleet.quality', string='Check Name',domain=[('quality_type', '=', 'analysis_id.quality_type')])
     nots = fields.Text(string='Nots')
 
-
+    # @api.onchange('quality_id')
+    # def onchange_product_id(self):
+    #     if self.quality_id:
+    #         domain = [('quality_type', '=', self.analysis_id.quality_type)]
+    #     return {'domain': {'quality_id': domain}}
+    #
+    #
 
 
 

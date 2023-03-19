@@ -42,7 +42,6 @@ class FleetWorkshop(models.Model):
         'Fuel Type', help='Fuel Used by the vehicle')
     registration_no = fields.Char(string="Engine Number ")
     odometer = fields.Char(string='Last Odometer')
-
     guarantee = fields.Selection([('yes', 'On'), ('no', 'Off')], string='Guarantee?')
     guarantee_type = fields.Selection([('paid', 'payable'), ('free', 'No Cost')], string='Type')
     service_advisor_id = fields.Many2one('res.users', string='Service Advisor')
@@ -54,14 +53,13 @@ class FleetWorkshop(models.Model):
     description = fields.Text(string='Notes')
     service_detail = fields.Text(string='Service Details')
     state = fields.Selection([
-        ('draft', 'Draft'),
-        ('confirm', 'Confirm'),
-        ('to_approve', 'Approved Order'),
-        ('in_progress', 'In Progress'),
+        ('reception', 'Reception'),
+        ('repar', 'Repar'),
         ('quality_check', 'Quality Check'),
-        ('completed', 'Completed'),
-        ('cancel', 'Cancelled'),
-    ], 'Status', default="draft", readonly=True, copy=False, help="Gives the status of the fleet repairing.")
+        ('delivery_invoicing', 'Delivery & Invoicing'),
+        ('follow_up', 'Follow Up'),
+        ('closed', 'Closed'),
+    ], 'Status', default="reception", readonly=True, copy=False, help="Gives the status of the fleet repairing.")
     company_id = fields.Many2one('res.company', string='Company', required=True, readonly=True, index=True,
                                  default=lambda self: self.env.company)
     currency_id = fields.Many2one('res.currency', related="company_id.currency_id",
@@ -217,16 +215,16 @@ class FleetWorkshop(models.Model):
 
     def action_open_purchase_order(self):
         pass
-    def print_quotation(self):
+    def print_job_card(self):
         return self.env.ref('workshop_service_management.report_workshop_quotation').report_action(self)
 
-    def button_confirm(self):
+    def button_repair(self):
         for line in self:
-            line.write({'state': 'confirm'})
+            line.write({'state': 'repar'})
 
     def button_approve(self):
         for line in self:
-            line.write({'state': 'in_progress'})
+            line.write({'state':'repar'})
 
     def action_create_invoice(self):
         for line in self:
@@ -238,7 +236,7 @@ class FleetWorkshop(models.Model):
 
     def button_cancel(self):
         for line in self:
-            line.write({'state': 'completed'})
+            line.write({'state': 'closed'})
 
 
     def button_done(self):
@@ -247,6 +245,25 @@ class FleetWorkshop(models.Model):
     def button_quality(self):
         for line in self:
             line.write({'state': 'quality_check'})
+    def button_followup(self):
+        crm =  self.env['crm.lead']
+        if self:
+            crm.sudo().create(
+            {
+                'workshop_id': self.id,
+                'name': self.sequence,
+                'partner_id': self.client_id.id,
+                'phone': self.client_phone,
+                'fleet_id':self.fleet_id.id,
+                'license_plate':self.fleet_id.license_plate,
+                'vin_sn':self.fleet_id.vin_sn,
+                'fuel_type':self.fleet_id.fuel_type,
+                'model_id':self.fleet_id.model_id.id,
+                'registration_no':self.fleet_id.registration_no,
+                'model_year':self.fleet_id.model_year,
+                'odometer':self.fleet_id.odometer
+             })
+            self.write({'state': 'follow_up'})
 
 class PurchaseOrderLine(models.Model):
     _name = 'external.purchase.order'
@@ -291,7 +308,7 @@ class JobTasks(models.Model):
     _name = 'job.tasks.line'
     _description = "Job Tasks"
     _order = 'id desc'
-    user_id = fields.Many2one('hr.employee', string='Assigned To', required=True)
+    user_id = fields.Many2one('hr.employee', string='Assigned To',domain=[('mechanic', '=',True)], required=True)
     fleet_workshop_id = fields.Many2one('fleet.workshop')
     product_id = fields.Many2one('product.product', string='Name', domain=[('detailed_type', '=', 'service')],
                                  required=True)

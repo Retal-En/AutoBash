@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Customize hr View -->
+    <record id="crm_lead_form_view" model="ir.ui.view">
+        <field name="name">crm.lead.inherit</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="button_cancel" icon="fa-gears" string="Workshop"
+                        attrs="{'invisible': [('workshop_id', '=', False)]}">
+                </button>
+            </xpath>
+            <xpath expr="//page[@name='lead']" position="after">
+                <page string="Workshop Information " name="Workshop Information"
+                      attrs="{'invisible': [('workshop_id', '=', False)]}">
+
+                    <group string="Fleet Information">
+                        <group>
+                            <field name="fleet_id"/>
+                            <field name="model_year"/>
+
+                            <field name="license_plate"/>
+                            <field name="vin_sn"/>
+                        </group>
+                        <group>
+                            <field name="model_id"/>
+                            <field name="registration_no"/>
+                            <field name="odometer"/>
+                            <field name="fuel_type"/>
+                            <field name="workshop_id" invisible="1"/>
+
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

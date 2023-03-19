@@ -12,7 +12,7 @@
                         <button name="action_spare_part_approved" type="object" string="Approved Order"
                                 states="spare_part"
                                 class="btn-primary"/>
-                                                <button name="action_spare_part_drift" string="ppppppppp" type="object" />
+<!--                        <button name="action_spare_part_drift" string="ppppppppp" type="object"/>-->
 
                         <button name="action_spare_part_order_cancel" type="object" states="spare_part" string="Cancel"
                                 class="oe_highligth"/>
@@ -30,13 +30,14 @@
                                        attrs="{'required': [('state', '=', 'draft')],'readonly': [('state', 'not in', ('draft')),]}"/>
                                 <field name="stock_picking_id"
                                        options="{'no_create': True}" groups="stock.group_stock_multi_locations"
-                                       attrs="{'readonly': [('state', 'not in', ('draft'))]}"/>
+                                       attrs="{'invisible': [('state', 'in', ('draft'))] ,'required': [('state', 'in', ('spare_part','approved'))]}"/>
+
 
                                 <field name="location_id"
-                                       attrs="{'readonly': [('state', 'not in', ('draft'))]}"/>
+                                       attrs="{'invisible': [('state', 'in', ('draft'))] ,'required': [('state', 'in', ('spare_part','approved'))]}"/>
 
                                 <field name="location_des_id"
-                                       attrs="{'readonly': [('state', 'not in', ('draft'))]}"/>
+                                       attrs="{'invisible': [('state', 'in', ('draft'))] ,'required': [('state', 'in', ('spare_part','approved'))]}"/>
 
                             </group>
                             <group>
@@ -63,7 +64,7 @@
                             </page>
                         </notebook>
                     </sheet>
-                      <div class="oe_chatter">
+                    <div class="oe_chatter">
                         <field name="message_follower_ids" groups="base.group_user"/>
                         <field name="activity_ids"/>
                         <field name="message_ids"/>

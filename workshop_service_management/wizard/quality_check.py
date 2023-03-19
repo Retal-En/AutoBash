@@ -16,35 +16,48 @@ class QualityCheck(models.TransientModel):
     paints_and_plumbing = fields.Boolean(string="Paints & Plumbing")
     workshop_id = fields.Many2one('fleet.workshop', string='Workshop')
     def action_quality_check(self):
-        raise UserError(_("-----------------------"))
+        if self.workshop_id:
+            workshop =self.workshop_id
+            quality = self.env['fleet.quality.analysis']
+            vals = { }
+            if self.car:
+                vals = {
+                        'fleet_id': workshop.fleet_id.id,
+                        'license_plate': workshop.fleet_id.license_plate,
+                        'vin_sn': workshop.fleet_id.vin_sn,
+                        'fuel_type': workshop.fleet_id.fuel_type,
+                        'model_id': workshop.fleet_id.model_id.id,
+                        # 'registration_no': workshop.fleet_id.registration_no,
+                        'model_year': workshop.fleet_id.model_year,
+                        'quality_type': 'car',
+                    }
+                quality.create(vals)
 
-        pass
-        # job_id = self.env['fleet.workshop']
-        # if self.appointment_id:
-        #     job_id.create({
-        #         'client_id': self.appointment_id.client_id.id,
-        #         'client_phone': self.appointment_id.client_id.phone,
-        #         'partner_id': self.appointment_id.client_id.partner_id,
-        #         'client_mobile': self.appointment_id.client_id.mobile,
-        #         'service_advisor_id': self.user_id.id,
-        #         'advisor_nots': self.nots,
-        #         'appointment_description':self.appointment_id.description,
-        #         'sequence': self.env['ir.sequence'].next_by_code('fleet.workshop') or _('New'),
-        #         'fleet_repair_line': [
-        #             (0, 0, {
-        #                 'fleet_id': line.fleet_id.id,
-        #                 'license_plate': line.license_plate,
-        #                 'model_id': line.model_id.id,
-        #                 'vin_sn': line.vin_sn,
-        #                 'fuel_type': line.fuel_type,
-        #                 'registration_no': line.registration_no,
-        #
-        #             }
-        #              )
-        #             for line in self.appointment_id.fleet_appointment_line]
-        #
-        #     }
-        #     )
-        #     self.appointment_id.write({'advisor_nots':self.nots,
-        #                                'state':'done'})
+
+            if self.spare_check:
+                vals = {
+                    'fleet_id': workshop.fleet_id.id,
+                    'license_plate': workshop.fleet_id.license_plate,
+                    'vin_sn': workshop.fleet_id.vin_sn,
+                    'fuel_type': workshop.fleet_id.fuel_type,
+                    'model_id': workshop.fleet_id.model_id.id,
+                    # 'registration_no': workshop.fleet_id.registration_no,
+                    'model_year': workshop.fleet_id.model_year,
+                    'quality_type': 'spare_check',
+                }
+                quality.create(vals)
+
+
+            if self.paints_and_plumbing:
+                vals = {
+                    'fleet_id': workshop.fleet_id.id,
+                    'license_plate': workshop.fleet_id.license_plate,
+                    'vin_sn': workshop.fleet_id.vin_sn,
+                    'fuel_type': workshop.fleet_id.fuel_type,
+                    'model_id': workshop.fleet_id.model_id.id,
+                    # 'registration_no': workshop.fleet_id.registration_no,
+                    'model_year': workshop.fleet_id.model_year,
+                    'quality_type': 'paints_and_plumbing',
+                }
+                quality.create(vals)
 

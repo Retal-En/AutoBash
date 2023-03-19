@@ -13,3 +13,4 @@ from . import purchase_requisition
 from . import stock_picking
 from . import sale_order
 from . import fleet_appointment
+from . import crm

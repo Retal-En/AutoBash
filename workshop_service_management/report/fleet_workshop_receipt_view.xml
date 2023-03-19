@@ -11,7 +11,7 @@
                                 <tr>
                                     <td>
                                         <center>
-                                            <img src="/workshop_service_management/static/logo/Logo.jpeg" width="100"/>
+                                            <img src="/workshop_service_management/static/logo/logo.png" width="100"/>
                                         </center>
                                     </td>
                                     <td width="130%">
@@ -26,7 +26,7 @@
                                     </td>
                                     <td>
                                         <center>
-                                            <img src="/workshop_service_management/static/logo/Logo.jpeg" width="100"/>
+                                            <img src="/workshop_service_management/static/logo/logo.png" width="100"/>
                                         </center>
                                     </td>
                                 </tr>
@@ -36,260 +36,107 @@
                 </div>
             </div>
             <div class="article">
-                <h3>Requests for Quotation</h3>
-
                 <table class="table table-condensed table-bordered" style="width: 100%">
                     <thead>
                         <tr>
-                            <th style="width:40%">
-
-                                <strong>Date:</strong>
-                            </th>
-                            <th style="width:60%" colspan="3">
-
-
-                                <span t-field="o.receipt_date"/>
-                            </th>
+                            <td>
+                                Job Order No #
+                            </td>
+                            <td>
+                                <span t-field="o.sequence"/>
+                            </td>
+                            <td>Service Advisor :</td>
+                            <td>
+                                <span t-field="o.user_id"/>
+                            </td>
                         </tr>
-                        <tr>
-                            <th style="width:20%">
-
-                                <strong>Client Name:</strong>
-                            </th>
-                            <th style="width:30%">
-
-                                <span t-field="o.client_id"/>
-                            </th>
-                            <th style="width:20%">
-
-                                <strong>Client Id:</strong>
-                            </th>
-                            <th style="width:30%">
-                                <span t-field="o.partner_id"/>
-
-                            </th>
-                        </tr>
-
                     </thead>
                 </table>
-                <table class="table table-sm o_main_table" style="margin-top:40px">
-                    <thead>
-                        <tr>
-                            <th>
-                                <strong>Service Name</strong>
-                            </th>
-                            <th colspan="2">
-                                <strong>Price Unit</strong>
-                            </th>
-                        </tr>
-                    </thead>
+                <table class="table table-condensed table-bordered" style="width: 100%">
                     <tbody>
-                        <t t-foreach="o.task_line" t-as="line">
+                        <t t-foreach="o" t-as="line">
                             <tr>
-                                <td id="product_id" colspan="2">
-                                    <span t-field="line.product_id" colspan="2"/>
-                                </td>
-                                <td id="price_unit">
-                                    <span t-field="line.price_unit"/>
-                                </td>
-                            </tr>
-                        </t>
-                        <tr>
-                            <th>
-                                <strong>Total</strong>
-                            </th>
-                            <th colspan="2">
-
-                                <span t-field="o.job_tasks"/>
-
-                            </th>
-
-                        </tr>
-
-
-                        <tr>
-                            <th>
-                                <strong>Spare Part Name</strong>
-                            </th>
-                            <th>
-                                <strong>Quantity</strong>
-                            </th>
-                            <th>
-                                <strong>Price Unit</strong>
-                            </th>
-                        </tr>
-
-                        <t t-foreach="o.spare_part_ids" t-as="line">
-                            <tr>
+                                <td>Customer Name :</td>
                                 <td>
-                                    <span t-field="line.product_id" colspan="2"/>
+                                    <span t-field="line.client_id.name"/>
                                 </td>
-                                <td id="price_unit">
-                                    <span t-field="line.price_unit"/>
-                                </td>
-                                <td id="quantity">
-                                    <span t-field="line.quantity"/>
-                                </td>
-                            </tr>
-                        </t>
-                        <tr>
-                            <th>
-                                <strong>Total</strong>
-                            </th>
-                            <th colspan="2">
-                                <span t-field="o.spare_part"/>
-
-                            </th>
-                        </tr>
-                        <tr>
-                            <th>
-                                <strong>Product</strong>
-                            </th>
-                            <th>
-                                <strong>Quantity</strong>
-                            </th>
-                            <th>
-                                <strong>Price Unit</strong>
-                            </th>
-                        </tr>
-                        <t t-foreach="o.purchase_order_line" t-as="line">
-                            <tr>
+                                <td>VIN NO:</td>
                                 <td>
-                                    <span t-field="line.product_id" colspan="2"/>
-                                </td>
-                                <td id="price_unit">
-                                    <span t-field="line.price_unit"/>
-                                </td>
-                                <td id="quantity">
-                                    <span t-field="line.quantity"/>
+                                    <span t-field="line.vin_sn"/>
                                 </td>
                             </tr>
-                        </t>
-                        <tr>
-                            <th>
-                                <strong>Total</strong>
-                            </th>
-                            <th colspan="2">
-
-                                <span t-field="o.purchase_total"/>
-
-                            </th>
-                        </tr>
-                        <tr>
-                            <th>
-                                <strong>Product</strong>
-                            </th>
-                            <th>
-                                <strong>Quantity</strong>
-                            </th>
-                            <th>
-                                <strong>Price Unit</strong>
-                            </th>
-                        </tr>
-                        <t t-foreach="o.purchase_order_line" t-as="line">
                             <tr>
+                                <td>Address phone NO :</td>
                                 <td>
-                                    <span t-field="line.product_id" colspan="2"/>
+                                    <span t-field="line.client_id.phone"/>
                                 </td>
-                                <td id="price_unit">
-                                    <span t-field="line.price_unit"/>
-                                </td>
-                                <td id="quantity">
-                                    <span t-field="line.quantity"/>
+                                <td>Vehicle Description:</td>
+                                <td>
+                                    <span t-field="line.fleet_id"/>
                                 </td>
                             </tr>
-                        </t>
-                        <tr>
-                            <th>
-                                <strong>Total</strong>
-                            </th>
-                            <th colspan="2">
 
-                                <span t-field="o.purchase_total"/>
+<!--                            <tr>-->
+<!--                                <td>Mobile NO# :</td>-->
+<!--                                <td>-->
+<!--                                    <span t-field="line.client_id.mobile"/>-->
+<!--                                </td>-->
+<!--                            </tr>-->
 
-                            </th>
-                        </tr>
-                        <tr>
-                            <th>
-                                <strong>Product</strong>
-                            </th>
-                            <th>
-                                <strong>Quantity</strong>
-                            </th>
-                            <th>
-                                <strong>Price Unit</strong>
-                            </th>
-                        </tr>
-                        <t t-foreach="o.purchase_order_line" t-as="line">
                             <tr>
+                                <td>Date Time :</td>
                                 <td>
-                                    <span t-field="line.product_id" colspan="2"/>
+                                    <span t-field="line.receipt_date"/>
                                 </td>
-                                <td id="price_unit">
-                                    <span t-field="line.price_unit"/>
-                                </td>
-                                <td id="quantity">
-                                    <span t-field="line.quantity"/>
+                                <td>Engine NO:</td>
+                                <td>
+                                    <span t-field="line.fleet_id.registration_no"/>
                                 </td>
                             </tr>
-                        </t>
-                        <tr>
-                            <th colspan="2">
-                                <strong>Total</strong>
-                            </th>
-                            <th>
-                                <span t-field="o.purchase_total"/>
-
-                            </th>
-                        </tr>
-
-                        <tr>
-                            <th>
-                                <strong>Product</strong>
-                            </th>
-                            <th>
-                                <strong>Quantity</strong>
-                            </th>
-                            <th>
-                                <strong>Price Unit</strong>
-                            </th>
-                        </tr>
-                        <t t-foreach="o.external_order_line" t-as="line">
                             <tr>
+                                <td>Delviry Date :</td>
                                 <td>
-                                    <span t-field="line.product_id" colspan="2"/>
+                                    <span t-field="line.delivery_date"/>
                                 </td>
-                                <td id="price_unit">
-                                    <span t-field="line.price_unit"/>
-                                </td>
-                                <td id="quantity">
-                                    <span t-field="line.quantity"/>
+                                <td>Color code #</td>
+                                <td>
+                                    <span t-field="line.fleet_id.color"/>
                                 </td>
                             </tr>
+                            <tr>
+                                <td>Payment Mode :</td>
+                                <td>
+                                    <span t-field="line.client_phone"/>
+                                </td>
+                                <td>KM reading#</td>
+                                <td>
+                                    <span t-field="line.fleet_id"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Job Type:</td>
+                                <td>
+                                    <span t-field="line.client_phone"/>
+                                </td>
+                                <td>Acquisition Date :</td>
+                                <td>
+                                    <span t-field="line.fleet_id"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Car Owner:</td>
+                                <td>
+                                    <span t-field="line.fleet_id.future_driver_id.name"/>
+                                </td>
+                                <td>Car User:</td>
+                                <td>
+                                    <span t-field="line.fleet_id.driver_id"/>
+                                </td>
+                            </tr>
+
                         </t>
-                        <tr>
-                            <th>
-                                <strong>Total</strong>
-                            </th>
-                            <th colspan="2">
-                                <span t-field="o.external_total"/>
-
-                            </th>
-                        </tr>
-                        <tr>
-                            <th colspan="2">
-
-                                <strong>Total Amount</strong>
-
-                            </th>
-                            <th>
-                                <span t-field="o.amount_total"/>
-                            </th>
-
-                        </tr>
                     </tbody>
                 </table>
-
 
             </div>
             <div class="footer">

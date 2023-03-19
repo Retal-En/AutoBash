@@ -22,7 +22,6 @@
                 <form string="Fleet Quality">
                     <sheet>
                         <group col="4">
-                            <field name="sequence"/>
                             <field name="name"/>
                             <field name="quality_type"/>
                         </group>
