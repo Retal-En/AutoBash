@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="viwe_available_technician_tree" model="ir.ui.view">
+            <field name="name">available.technician.tree</field>
+            <field name="model">available.technician</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="request_date"/>
+
+                </tree>
+            </field>
+        </record>
+
+
+        <record id="viwe_available_technician_form" model="ir.ui.view">
+            <field name="name">available.technician.form</field>
+            <field name="model">available.technician</field>
+            <field name="arch" type="xml">
+                <form string="Available Technician">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="request_date"/>
+                            </group>
+                            <group>
+                            </group>
+                        </group>
+
+                        <group col="4" string="Work Hours">
+                            <field name="sign_in"/>
+                            <field name="sign_out"/>
+                        </group>
+                        <group col="4" string="Breakfast break">
+                            <field name="breakfast_start"/>
+                            <field name="breakfast_end"/>
+                        </group>
+                        <group col="4" string="Dhohr Prayer Break">
+                            <field name="dhuhr_start"/>
+                            <field name="dhuhr_end"/>
+                        </group>
+                        <group col="4" string="Asr Prayer Break">
+                            <field name="asr_start"/>
+                            <field name="asr_end"/>
+                        </group>
+                         <notebook>
+                        <page>
+                             <button name="action_available_technician" string="compute"
+                                    type="object" class="oe_highlight"/>
+                            <field name="line_ids">
+                                <tree editable="bottom">
+                                    <field name="employee_id" readonly="1"/>
+                                    <field name="available" readonly="1"/>
+                                    <field name="sign_in" readonly="1"/>
+                                    <field name="sign_out" readonly="1"/>
+                                    <field name="breakfast_start" readonly="1"/>
+                                    <field name="breakfast_end" readonly="1"/>
+                                    <field name="dhuhr_start" readonly="1"/>
+                                    <field name="dhuhr_end" readonly="1"/>
+                                    <field name="asr_start" readonly="1"/>
+                                    <field name="asr_end" readonly="1"/>
+                                    <field name="busy" readonly="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                         </notebook>
+
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" groups="base.group_user"/>
+                        <field name="message_ids"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+
+        <record id="action_available_technician" model="ir.actions.act_window">
+            <field name="name">Available Technician</field>
+            <field name="res_model">available.technician</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{}</field>
+            <field name="domain">[]</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Ready to recruit more efficiently?
+                </p>
+                <p>
+                    Let's create a available technician .
+                </p>
+            </field>
+        </record>
+
+
+        <menuitem name="Technician"
+                  id="menu_available_technician"
+                  parent="menu_fleet_mechanic_menu"
+                  action="action_available_technician"
+                  sequence="20"/>
+
+
+    </data>
+</odoo>

@@ -12,12 +12,14 @@ class FleetWorkshop(models.Model):
     _inherit = ['mail.thread']
     _description = "Fleet Workshop"
     _order = 'id desc'
+    #
     sequence = fields.Char(string='Sequence', required=True, readonly=True, default=lambda self: _('New'))
     client_id = fields.Many2one('res.partner', string='Customer Name', required=True)
     client_phone = fields.Char(string='Phone')
     client_mobile = fields.Char(string='Mobile')
     client_email = fields.Char(string='Email')
     partner_id = fields.Char(string="Client ID", required=True)
+    drive_id = fields.Many2one('res.partner', string='Drive Name')
     receipt_date = fields.Date(string='Date of Receipt', default=datetime.today())
     delivery_date = fields.Date(string='Estimated delivery time', default=fields.Datetime.now)
     contact_name = fields.Char(string='Contact Name')
@@ -74,14 +76,44 @@ class FleetWorkshop(models.Model):
     spare_part_count = fields.Integer(string='Purchase Count',compute="_comput_purchase_count",stor=True)
     sale_id = fields.Many2one('sale.order',string="References")
     remark =fields.Text(string="")
+    attachment_ids = fields.Many2many('ir.attachment', string='Attachment', required=True)
+    payment_mode = fields.Selection([
+        ('redo', 'Redo'),
+        ('insurance', 'Insurance'),
+        ('warranty', 'Warranty'),
+        ('cash', 'Cash'),
+        ('goodwill', 'Good Will'),
+        ('workshop', 'Work Shop'),
+        ('promotion', 'Promotion'),
+        ('company_cars', 'Company Cars'),
+        ('sales_used_cars', 'Sales & Used Cars'), ], 'Payment Mode', required=True)
+
     #
     external_total = fields.Float(string='External Purchase', currency_field='company_currency_id', tracking=True ,compute='_compute_external_order_price', store=True)
     purchase_total = fields.Float(string='Purchase', currency_field='company_currency_id', tracking=True ,compute='_compute_purchase_order_price', store=True)
     spare_part = fields.Float(string='Spare Part', currency_field='company_currency_id', tracking=True ,compute='_compute_spear_order_price', store=True)
     job_tasks = fields.Float(string='Job Tasks', currency_field='company_currency_id',compute='_compute_job_tasks_price', store=True)
+    total_tax = fields.Float(string='Total Taxes',compute='_compute_total_tax', store=True)
     #
-    amount_total = fields.Float(string='amount total', currency_field='company_currency_id', tracking=True,compute='_compute_all_order_price', store=True)
+    untaxed_amount_total = fields.Float(string='Untaxed Amount', currency_field='company_currency_id', tracking=True,compute='_compute_all_untaxed_order_price', store=True)
+    amount_total = fields.Float(string='Total Amount', currency_field='company_currency_id', tracking=True,compute='_compute_all_order_price', store=True)
     #
+    company_id = fields.Many2one('res.company', string="Company", default=lambda self: self.env.user.company_id,
+                                 readonly=True)
+    warehouse_id = fields.Many2one('stock.warehouse', 'Temp Warehouse')
+    source_warehouse_id = fields.Many2one('stock.warehouse', 'From Warehouse')
+    # account
+
+    redo_account_id = fields.Many2one('account.account', string="Account Redo",required=True)
+    insurance_account_id = fields.Many2one('account.account', string="Account Insurance",required=True)
+    warranty_account_id = fields.Many2one('account.account', string="Account Warranty",required=True)
+    cash_account_id = fields.Many2one('account.account', string="Account Cash",required=True)
+    goodwill_account_id = fields.Many2one('account.account', string="Account Goodwill",required=True)
+    workshop_account_id = fields.Many2one('account.account', string="Account Workshop",required=True)
+    promotion_account_id = fields.Many2one('account.account', string="Account Promotion",required=True)
+    company_cars_account_id = fields.Many2one('account.account', string="Account Company Cars",required=True)
+    sales_used_cars_account_id = fields.Many2one('account.account', string="Account Sales & Used Cars",required=True)
+
     @api.onchange('fleet_id')
     def onchange_fleet_id(self):
         fleet_id = self.fleet_id
@@ -94,14 +126,28 @@ class FleetWorkshop(models.Model):
             self.registration_no = fleet_id.registration_no or ''
             self.odometer = fleet_id.odometer
 
-
-
     @api.depends('external_total', 'purchase_total','spare_part', 'job_tasks')
-    def _compute_all_order_price(self):
+    def _compute_all_untaxed_order_price(self):
         total = 0
         for line in self:
             total = (line.external_total + line.purchase_total + line.spare_part + line.job_tasks)
+        self.untaxed_amount_total = total
+    @api.depends('untaxed_amount_total', 'total_tax',)
+    def _compute_all_order_price(self):
+        total = 0
+        for line in self:
+            total = (line.total_tax + line.untaxed_amount_total)
         self.amount_total = total
+
+    @api.depends('job_tasks')
+    def _compute_total_tax(self):
+        total_tax = 0
+        for line in self.task_line:
+            if self.payment_mode and self.payment_mode == 'cash':
+                total_tax += line.total * (line.taxes_id.amount / 100)
+        self.total_tax = total_tax
+
+
 
 
     @api.depends('external_order_line.price_total', )
@@ -124,11 +170,15 @@ class FleetWorkshop(models.Model):
         for line in self.spare_part_ids:
             total += line.price_total
         self.spare_part = total
-    @api.depends('task_line.payment_mode', )
+    @api.depends('task_line.service_type', )
     def _compute_job_tasks_price(self):
         total = 0
+        if not self.payment_mode:
+            self.service_type = False
+            raise UserError(_("You must specify the type of payment for the job"))
         for line in self.task_line:
-            total += line.price_unit
+            if self.payment_mode and self.payment_mode == 'cash':
+                total += line.total
         self.job_tasks = total
 
     @api.model
@@ -217,22 +267,22 @@ class FleetWorkshop(models.Model):
         pass
     def print_job_card(self):
         return self.env.ref('workshop_service_management.report_workshop_quotation').report_action(self)
-
+    def button_draft(self):
+        for line in self:
+           line.write({'state': 'repar'})
     def button_repair(self):
         for line in self:
-            line.write({'state': 'repar'})
-
-    def button_approve(self):
-        for line in self:
             line.write({'state':'repar'})
+
+    def button_draft(self):
+        for line in self:
+            line.write({'state': 'reception'})
 
     def action_create_invoice(self):
         for line in self:
             line.write({'state': 'completed'})
 
-    def button_draft(self):
-        for line in self:
-            line.write({'state': 'draft'})
+
 
     def button_cancel(self):
         for line in self:
@@ -308,9 +358,11 @@ class JobTasks(models.Model):
     _name = 'job.tasks.line'
     _description = "Job Tasks"
     _order = 'id desc'
+    _rec_name = "product_id"
+
     user_id = fields.Many2one('hr.employee', string='Assigned To',domain=[('mechanic', '=',True)], required=True)
     fleet_workshop_id = fields.Many2one('fleet.workshop')
-    product_id = fields.Many2one('product.product', string='Name', domain=[('detailed_type', '=', 'service')],
+    product_id = fields.Many2one('product.product', string='Name', domain=[('detailed_type', '=', 'service'),('is_car', '=', 'is_labour')],
                                  required=True)
     company_currency_id = fields.Many2one('res.currency', related="fleet_workshop_id.currency_id", string="Currency")
     duration_expected = fields.Float(
@@ -327,15 +379,12 @@ class JobTasks(models.Model):
         ('cancel', 'Cancelled')], string='Status',
         store=True,
         default='ready', copy=False, readonly=True, index=True)
-
-
-
     price_unit = fields.Float(related="product_id.list_price")
+    stander_time = fields.Float(related="product_id.service_stander_time")
     date_finished = fields.Datetime(string="Time", )
-    taxes_id = fields.Many2many('account.tax', string='Taxes', related="product_id.taxes_id")
+    taxes_id = fields.Many2one('account.tax', string='Taxes')
     price_subtotal = fields.Monetary(string='Subtotal', compute="_compute_price_subtotal",
                                      currency_field='company_currency_id', tracking=True)
-
     date_start = fields.Datetime(
         'Start Date',
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
@@ -346,35 +395,47 @@ class JobTasks(models.Model):
         store=True, copy=False)
 
     service_type = fields.Selection([
-        ('body_shop', 'Body Shop'),
-        ('quick_service', 'Quick Service'),
-        ('mechanics', 'Mechanics'),
+        ('regular_maintenance', 'Regular Maintenance'),
+        ('general_repair', 'General Repair'),
+        ('initial_maintenance', 'Initial Maintenance'),
+        ('stock_maintenance', 'Stock  Maintenance'),
         ('pdi', 'PDI')], 'Service Type', required=True)
-    payment_mode = fields.Selection([
-        ('redo', 'Redo'),
-        ('insurance', 'Insurance'),
-        ('warranty', 'Warranty'),
-        ('customer', 'Cash'),
-        ('goodwill', 'Good Will'),
-        ('workshop', 'Work Shop'),
-        ('promotion', 'Promotion'),
-        ('company_cars', 'Company Cars'),
-        ('sales_used_cars', 'Sales & Used Cars'), ], 'Payment Mode', required=True)
+    total = fields.Monetary(string='Total', compute="_compute_price_total",
+                                     currency_field='company_currency_id', tracking=True)
 
-    @api.depends('price_unit')
+
+    @api.depends('price_unit','total')
     def _compute_price_subtotal(self):
         for rec in self:
-            rec.price_subtotal = rec.price_unit
+            rec.price_subtotal = (rec.price_unit * rec.total)
+
+    @api.depends('price_unit','stander_time')
+    def _compute_price_total(self):
+        for rec in self:
+            if rec.stander_time <= 0:
+                rec.total = rec.price_unit
+            else:
+                rec.total = (rec.price_unit * rec.stander_time)
+
+
 
 
     def button_start(self):
         start_date = datetime.now()
         for line in self:
-            vals = {
-                'state': 'progress',
-                'date_start': start_date,
-            }
-            return line.write(vals)
+            available_mechanic = self.env['available.technician.line'].search([('employee_id', '=', line.user_id.id), ('today_date', '=', start_date.date())])
+            if not available_mechanic:
+                raise ValidationError(_('%s is not available today') % self.user_id.name)
+            elif available_mechanic.busy == True:
+                raise ValidationError(_('%s is busy now') % self.user_id.name)
+            else:
+                line.date_start = fields.Datetime.now()
+                line.state = 'progress'
+                available_mechanic.write({
+                    'busy': True,
+                    'fleet_workshop_id': line.fleet_workshop_id.id
+                })
+
 
 
     def button_pending(self):
@@ -394,7 +455,15 @@ class JobTasks(models.Model):
     def button_finish(self):
         pass
     def button_block(self):
-        pass
+        today = fields.Datetime.now()
+        for line in self:
+            available_mechanic = self.env['available.technician.line'].search([('employee_id', '=', line.user_id.id), ('today_date', '=', today.date())])
+            available_mechanic.write({
+                'busy': False,
+            })
+            available_mechanic.employee_id.write({ 'mechanic_status' :'ready'})
+            # line.fleet_workshop_id = False
+            line.state = 'cancel'
 
     @api.depends('date_start', 'date_pause')
     def _compute_task_time(self):
@@ -492,20 +561,24 @@ class spare_part_line(models.Model):
         _description = "spare part line"
         _order = 'id desc'
 
-        product_id = fields.Many2one('product.product', string='Product', domain=[('is_car', '=', 'is_spare')] ,required=True)
+        product_id = fields.Many2one('product.product', string='Part No:', domain=[('is_car', '=', 'is_spare')] ,required=True)
         fleet_spare_id = fields.Many2one('fleet.workshop')
 
         name = fields.Char(string='Description')
         default_code = fields.Char(string='Product Code')
         workorder_id = fields.Many2one('fleet.workshop', string='fleet Workorder')
         company_currency_id = fields.Many2one('res.currency', related="workorder_id.currency_id", string="Currency")
+        description = fields.Text(string='Description')
+        remark = fields.Text(string='Remarks')
 
         uom_id = fields.Many2one('uom.uom', 'Unit of Measure')
         quantity = fields.Float(string='Quantity', required=True, default=1)
         price_unit = fields.Float(string='Unit Price')
         taxes_id = fields.Many2many('account.tax', string='Taxes',
                                     domain=['|', ('active', '=', False), ('active', '=', True)])
-        price_total = fields.Float(string='Subtotal', tracking=True,compute='_compute_price', store=True)
+        parts_advisor_id = fields.Many2one('res.users', string='Parts Advisor ',
+                                         default=lambda self: self.env.user)
+        price_total = fields.Float(string='Total', tracking=True,compute='_compute_price', store=True)
 
         @api.depends('quantity', 'price_unit')
         def _compute_price(self):
@@ -534,7 +607,7 @@ class PurchaseOrderLine(models.Model):
     product_id = fields.Many2one('product.product', string='Product', domain=[('purchase_ok', '=', True)])
     name = fields.Char(string='Description')
     purchase_id = fields.Many2one('fleet.workshop', string='fleet Workorder')
-
+    description = fields.Text(string='Description')
     default_code = fields.Char(string='Product Code')
     uom_id = fields.Many2one('uom.uom', 'Unit of Measure')
     quantity = fields.Float(string='Quantity', required=True, default=1)

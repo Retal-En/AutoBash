@@ -18,8 +18,20 @@
                 <xpath expr="//field[@name='driver_id']" position="after">
                     <field name="future_driver_id"/>
                 </xpath>
+
+                <xpath expr="//field[@name='driver_id']" position="attributes">
+                    <attribute name="required">1</attribute>
+                </xpath>
+                <xpath expr="//field[@name='acquisition_date']" position="attributes">
+                    <attribute name="required">1</attribute>
+                </xpath>
+                <xpath expr="//field[@name='vin_sn']" position="attributes">
+                    <attribute name="required">1</attribute>
+                </xpath>
+
                 <xpath expr="//field[@name='future_driver_id']" position="attributes">
                     <attribute name="string">Owner</attribute>
+                    <attribute name="required">1</attribute>
                 </xpath>
                 <xpath expr="//field[@name='horsepower']" position="before">
                     <field name="registration_no"/>

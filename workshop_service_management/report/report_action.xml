@@ -18,7 +18,7 @@
         </record>
 
         <record id="report_workshop_quotation" model="ir.actions.report">
-            <field name="name">Request for Quotation</field>
+        <field name="name">Job Card</field>
             <field name="model">fleet.workshop</field>
             <field name="report_type">qweb-pdf</field>
             <field name="report_name">workshop_service_management.workshop_quotation</field>

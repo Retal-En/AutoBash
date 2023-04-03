@@ -22,8 +22,8 @@ class fleet_appointment(models.Model):
     client_phone = fields.Char("Phone")
     client_mobile = fields.Char(string="Mobile")
     coll_date = fields.Datetime(string="Coll Date", default=fields.Datetime.now, required=True, readonly=True)
-    complaint_date = fields.Date(string="Appointment Date", default=fields.Date.today(), required=True)
-    priority = fields.Selection([('0', 'Low'), ('1', 'Normal'), ('2', 'High')], 'Priority')
+    complaint_date = fields.Datetime(string="Appointment Date", default=fields.Datetime.now, required=True)
+    priority = fields.Selection([('0', 'Normal'),('1', 'Low'), ('2', 'High'),('3', 'Very High')], 'Priority')
     company_id = fields.Many2one('res.company', ondelete='restrict',
                                  string='Company',
                                  required=True, default=lambda self: self.env.company)
@@ -64,7 +64,6 @@ class fleet_appointment(models.Model):
     def onchange_fleet_id(self):
         fleet_id = self.fleet_id
         if fleet_id:
-            pass
             self.license_plate = fleet_id.license_plate
             self.vin_sn = fleet_id.vin_sn
             self.fuel_type = fleet_id.fuel_type

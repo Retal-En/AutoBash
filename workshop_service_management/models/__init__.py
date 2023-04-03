@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from . import models
 from  . import res_partner
 from . import fleet_vehicle
 from . import  fleet_workshop
@@ -14,3 +13,4 @@ from . import stock_picking
 from . import sale_order
 from . import fleet_appointment
 from . import crm
+from . import available_technician

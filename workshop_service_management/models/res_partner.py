@@ -4,7 +4,7 @@ from odoo import models,fields,api
 class Partner(models.Model):
     _inherit = "res.partner"
 
-    partner_id = fields.Char(string=" ID Number" ,required=True)
+    partner_id = fields.Char(string=" ID Number")
     gender = fields.Selection([
         ('male', 'Male'),
         ('female', 'Female'),

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <menuitem id="job_order_task_menu" name="Job Order Tasks" parent="base.menu_base_fleet_repair" sequence="3"/>
+
+        <record id="view_job_tasks_line_tree" model="ir.ui.view">
+            <field name="name">job.tasks.line.tree</field>
+            <field name="model">job.tasks.line</field>
+            <field eval="2" name="priority"/>
+            <field name="arch" type="xml">
+                <tree string="Tasks" decoration-danger="state=='ready'" decoration-success="state=='ready'"
+                      decoration-muted="state=='ready'">
+                    <field name="user_id"/>
+                    <field name="product_id"/>
+                    <field name="fleet_workshop_id"/>
+                    <field name="stander_time"/>
+                    <field name="duration"/>
+                    <field name="state"/>
+                    <button name="button_start" type="object" string="Start" class="btn btn-primary" icon="fa-play"
+                    />
+                    <button name="button_pending" type="object" string="Pause" class="btn-warning" icon="fa-pause"
+                    />
+                    <button name="button_block" type="object" string="Cancel Task" icon="fa-times"
+                            confirm="Warning ! : The Task Will be cancelled"
+                    />
+                    <button name="button_finish" type="object" string="Done" class="btn-success"
+                            icon="fa-check-square-o"/>
+<!--                            attrs="{'invisible':[('state', 'in', ['done','cancel'])]}"-->
+
+
+
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_job_tasks_line_search" model="ir.ui.view">
+            <field name="name">Tasks</field>
+            <field name="model">job.tasks.line</field>
+            <field name="arch" type="xml">
+                <search string="Jobs">
+                    <group expand="0" string="Group By">
+                        <filter name="by_mechanic_id" string="Mechanic" context="{'group_by':'user_id'}"/>
+                        <filter name="status" string="Status" context="{'group_by':'state'}"/>
+                    </group>
+                    <field name="user_id" string="Mechanic"
+                           domain="[('user_id','ilike',self)]"/>
+                </search>
+            </field>
+        </record>
+        <record id="all_job_order_task_action" model="ir.actions.act_window">
+            <field name="name">Job Orders</field>
+            <field name="res_model">job.tasks.line</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[]</field>
+        </record>
+
+        <record id="ready_job_order_task_action" model="ir.actions.act_window">
+            <field name="name">Job Orders</field>
+            <field name="res_model">job.tasks.line</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('state', '=', 'ready')]</field>
+        </record>
+
+        <record id="progress_job_order_task_action" model="ir.actions.act_window">
+            <field name="name">Job Orders</field>
+            <field name="res_model">job.tasks.line</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('state', '=', 'progress')]</field>
+        </record>
+        <record id="pause_job_order_task_action" model="ir.actions.act_window">
+            <field name="name">Job Orders</field>
+            <field name="res_model">job.tasks.line</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('state', '=', 'Pause')]</field>
+        </record>
+        <record id="done_job_order_task_action" model="ir.actions.act_window">
+            <field name="name">Job Orders</field>
+            <field name="res_model">job.tasks.line</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('state', '=', 'done')]</field>
+        </record>
+        <record id="cancel_job_order_task_action" model="ir.actions.act_window">
+            <field name="name">Job Orders</field>
+            <field name="res_model">job.tasks.line</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('state', '=', 'cancel')]</field>
+        </record>
+
+        <!--        menus-->
+        <menuitem id="all_job_order_task_menu" sequence="0" action="all_job_order_task_action" name="Job Order Task"
+                  parent="job_order_task_menu"/>
+        <menuitem id="ready_job_order_task_menu" sequence="1" action="ready_job_order_task_action" name="Ready"
+                  parent="job_order_task_menu"/>
+        <menuitem id="progress_job_order_task_menu" sequence="2" action="progress_job_order_task_action"
+                  name=" In Progress"
+                  parent="job_order_task_menu"/>
+        <menuitem id="pause_job_order_task_menu" sequence="3" action="pause_job_order_task_action" name="Pause"
+                  parent="job_order_task_menu"/>
+        <menuitem id="done_job_order_task_menu" sequence="4" action="done_job_order_task_action" name="Finished"
+                  parent="job_order_task_menu"/>
+        <menuitem id="cancel_job_order_task_menu" sequence="5" action="cancel_job_order_task_action" name="Cancelled"
+                  parent="job_order_task_menu"/>
+
+
+    </data>
+</odoo>
