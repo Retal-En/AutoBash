@@ -86,7 +86,7 @@ class FleetWorkshop(models.Model):
         ('workshop', 'Work Shop'),
         ('promotion', 'Promotion'),
         ('company_cars', 'Company Cars'),
-        ('sales_used_cars', 'Sales & Used Cars'), ], 'Payment Mode', required=True)
+        ('sales_used_cars', 'Sales & Used Cars'), ], default='cash',string= 'Payment Mode', required=True)
 
     #
     external_total = fields.Float(string='External Purchase', currency_field='company_currency_id', tracking=True ,compute='_compute_external_order_price', store=True)
@@ -104,15 +104,15 @@ class FleetWorkshop(models.Model):
     source_warehouse_id = fields.Many2one('stock.warehouse', 'From Warehouse')
     # account
 
-    redo_account_id = fields.Many2one('account.account', string="Account Redo",required=True)
-    insurance_account_id = fields.Many2one('account.account', string="Account Insurance",required=True)
-    warranty_account_id = fields.Many2one('account.account', string="Account Warranty",required=True)
-    cash_account_id = fields.Many2one('account.account', string="Account Cash",required=True)
-    goodwill_account_id = fields.Many2one('account.account', string="Account Goodwill",required=True)
-    workshop_account_id = fields.Many2one('account.account', string="Account Workshop",required=True)
-    promotion_account_id = fields.Many2one('account.account', string="Account Promotion",required=True)
-    company_cars_account_id = fields.Many2one('account.account', string="Account Company Cars",required=True)
-    sales_used_cars_account_id = fields.Many2one('account.account', string="Account Sales & Used Cars",required=True)
+    redo_account_id = fields.Many2one('account.account', string="Account Redo")
+    insurance_account_id = fields.Many2one('account.account', string="Account Insurance")
+    warranty_account_id = fields.Many2one('account.account', string="Account Warranty")
+    cash_account_id = fields.Many2one('account.account', string="Account Cash")
+    goodwill_account_id = fields.Many2one('account.account', string="Account Goodwill")
+    workshop_account_id = fields.Many2one('account.account', string="Account Workshop")
+    promotion_account_id = fields.Many2one('account.account', string="Account Promotion")
+    company_cars_account_id = fields.Many2one('account.account', string="Account Company Cars")
+    sales_used_cars_account_id = fields.Many2one('account.account', string="Account Sales & Used Cars")
 
     @api.onchange('fleet_id')
     def onchange_fleet_id(self):
