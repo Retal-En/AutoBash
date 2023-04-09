@@ -13,7 +13,7 @@ class SaleContract(models.Model):
     sequence = fields.Char(string='Reference', required=True, copy=False, readonly=True, index=True,
                             default=lambda self: _('New'))
     contract_day_name = fields.Char(string="Contract Day",)
-    contract_date = fields.Date(string="Contract Date", default=datetime.today())
+    contract_date = fields.Date(string="Contract Date", default=fields.Date.context_today,)
     order_reference = fields.Char(string="Order Reference")
     company_id = fields.Many2one('res.company', string="Company")
     customer = fields.Many2one('res.partner', string="Customer")
@@ -42,16 +42,27 @@ class SaleContract(models.Model):
     first_witness_id_place = fields.Char()
     second_witness_id_place = fields.Char()
 
-
-
-
     state = fields.Selection([
         ('draft', 'Draft'),
         ('confirm', 'Confirm'),
         ('done', 'Contract is Done'),], default="draft")
     sale_id = fields.Many2one('sale.order')
 
+    # @api.onchange('contract_date')
     # def _compute_day(self):
+    #     res = {}
+    #     if self.contract_date:
+    #         a = datetime.strptime(str(self.contract_date, "%Y-%m-%d"))
+    #         if a:
+    #             b = datetime.strftime(a, '%A')
+    #             res = {'contract_day_name': b}
+    #         return {'value': res}
+    #     return True
+
+    # @api.depends('contract_date')
+    # def _get_day(self):
+    #     self.contract_day_name = self.contract_date and (datetime.strptime(self.contract_date, '%Y-%m-%d').date()).strftime('%A') or ''
+    # # def _compute_day(self):
     #     if self.contract_date:
     #         contract_day_name = fields.Datetime.from_string(self.contract_date).weekday()
     #         return str(contract_day_name)

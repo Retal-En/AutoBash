@@ -13,6 +13,11 @@ class SalePricelists(models.Model):
     is_cfr = fields.Boolean(string="Is CFR")
     down_payment_percentage = fields.Float(string="Down Payment Percentage")
     number_of_installment = fields.Integer(string="Number of Installment")
+#  4-3-2023
+    payment_method = fields.Selection([
+        ('cash', 'Cash'),
+        ('installment', 'Installment'),
+        ('cfr', 'CFR')], string="Payment Method", default='cash')
 
 
 class SaleInstallment(models.Model):

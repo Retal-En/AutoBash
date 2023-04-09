@@ -14,8 +14,10 @@
                 <group col="4">
                     <field name="is_installment" />
                     <field name="is_cfr" />
+                    <field name="payment_method" />
                     <field name="down_payment_percentage" attrs="{'invisible': [('is_installment', '!=', True)]}" placeholder="%" />
                     <field name="number_of_installment" attrs="{'invisible': [('is_installment', '!=', True)]}"/>
+
                 </group>
             <!-- </field>    -->
             </xpath>
@@ -96,11 +98,19 @@
         id="sale_installment_menu"
         parent="sale.sale_menu_root"
         name="Installment" 
-        sequence="50"/>
+        sequence="6"/>
     <menuitem 
         name="Installment"
         parent="sale_installment_menu" 
         id="sale_installment_sub_menu" 
         sequence="3" 
         action="action_sales_installment"/>
+
+<!-- installment menu items in sales  -->
+    <menuitem
+                id="in_pdc_payment_installment_menu"
+                name="Installments PDC"
+                parent="sale_installment_menu"
+                action="pdc_payment.pdc_payment_receive_action"
+                sequence="5"/>
 </odoo>

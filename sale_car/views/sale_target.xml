@@ -1,0 +1,146 @@
+<?xml version="1.0"?>
+<odoo>
+    <data>
+
+        <record model="ir.actions.act_window" id="action_view_commission">
+            <field name="name">Commission</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">commission.amount</field>
+<!--            <field name="view_type">form</field>-->
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('target_id','=',active_id)]</field>
+            <field name="context">{"default_target_id":active_id}</field>
+        </record>
+        <record id="sale_engineer_target_form" model="ir.ui.view">
+            <field name="name">sale.engineer.target.form</field>
+            <field name="model">target.sale</field>
+            <field name="arch" type="xml">
+                <form string="Sales Person Target">
+                    <header>
+                        <button string="Running" name="action_running" states="draft" type="object"  class="oe_highlight" />
+                        <button string="Compute Commission" name="action_compute" states="running" type="object"  class="oe_highlight" />
+                        <button string="Done" name="action_done" states="running" type="object"  class="btn-primary o_sale_print"/>
+                        <button string="Cancel" name="action_cancel"  states="draft,running" type="object"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,running,done" statusbar_colors='{"cancel":"red"}'/>
+                    </header>
+                    <sheet>
+
+                        <div class="oe_button_box" name="button_box">
+                            <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive">
+                                <field name="active" widget="boolean_button" options='{"terminology": "archive"}'/>
+                            </button>
+                            <button name="%(action_view_commission)d" type="action" class="oe_stat_button" icon="fa-pencil-square-o" attrs="{'invisible': [('commission_count', '=', 0)]}">
+                                <field name="commission_count" widget="statinfo" string="Commission"/>
+                            </button>
+                        </div>
+                        <group>
+                            <field name="name" required="1"/>
+                        </group>
+                        <group colspan="4" col="4">
+
+                            <field name="from_date" required="1"/>
+                            <field name="to_date" required="1"/>
+                            <field name="total_target" invisible ="1"/>
+                            <field name="total_actual" invisible ="1"/>
+                            <field name="crm_team_id" required="1"/>
+                            <field name="year" invisible ="1"/>
+
+                        </group>
+                        <group>
+                            <!--                            <div>-->
+                            <!--                                <field name="total_actual" widget="gauge"  options="{'max_field':'total_target'}" style="width:224px;height:224px;cursor:pointer;align:center">-->
+                            <!--                                    Progress-->
+                            <!--                                </field>-->
+                            <!--                            </div>-->
+                        </group>
+                        <field name="user_line">
+                            <tree string="Sales Person" editable="bottom">
+                                <field name="user_id" required="1"/>
+                                <field name="manager" invisible="1"/>
+                                <field name="target" required="1"/>
+                                <field name="actual" readonly="1"/>
+                                <field name="pending" readonly="1"/>
+                                <field name="target_line" invisible="1"/>
+                                <field name="is_manager" invisible="1"/>
+                                <field name="actual_percentage" widget="gauge"  options="{'max_field':'achieved_target_percentage'}" style="width:80px;height:80px;cursor:pointer" attrs="{'column_invisible': [('parent.state', '=', 'draft')]}">
+                                Achieved
+                                </field>
+
+                                <field name="achieved_target_percentage"  invisible="1"/>
+                            </tree>
+                        </field>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record model='ir.ui.view' id='sale_engineer_target_tree'>
+            <field name="name">sale.engineer.target.tree</field>
+            <field name="model">target.sale</field>
+            <field name="arch" type="xml">
+                <tree string="Sale Person">
+                    <field name="name"/>
+                    <field name="crm_team_id"/>
+                    <field name="from_date"/>
+                    <field name="to_date"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="sale_engineer_target_kanban" model="ir.ui.view">
+            <field name="name">target.sale.kanban</field>
+            <field name="model">target.sale</field>
+            <field name="arch" type="xml">
+                <kanban>
+                    <field name="total_target"/>
+                    <field name="total_actual"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_global_click">
+                                <strong class="o_kanban_record_title"><field name="name"/></strong>
+
+                                <field name="total_actual" widget="gauge" style="width:120px;height:90px;cursor:pointer;"
+                                       options="{'max_field': 'total_target'}">
+                                    Progress
+                                </field>
+                                <div class="o_kanban_record_top mb16">
+                                    <div class="o_kanban_record_headings mt4">
+                                        <strong class="o_kanban_record_title"><field name="crm_team_id"/></strong>
+                                    </div>
+                                    <strong><field name="from_date" /></strong> __
+                                    <strong><field name="to_date" /></strong>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+
+        <record model='ir.actions.act_window' id='sale_engineer_target_act'>
+            <field name="name">Sales Person Target</field>
+            <field name="res_model">target.sale</field>
+<!--            <field name="view_type">form</field>-->
+            <field name="view_mode">kanban,tree,form</field>
+        </record>
+
+<!--        <menuitem-->
+<!--                id="menu_monthly_sale_person_target"-->
+<!--                parent="is_sales_custmization.car_sale_order_menu"-->
+<!--                action="sale_engineer_target_act"-->
+<!--                sequence="25"/>-->
+        <!--Menuitems-->
+    <menuitem
+            id="sale_target_menu"
+            parent="sale.sale_menu_root"
+            name="Sale Target"
+            sequence="5"/>
+    <menuitem
+            name="Target"
+            parent="sale_target_menu"
+            id="menu_monthly_sale_person_target"
+            sequence="1"
+            action="sale_engineer_target_act"/>
+    </data>
+</odoo>

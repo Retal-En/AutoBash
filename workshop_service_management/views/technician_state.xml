@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <menuitem id="job_controller_menu" name="Job Controller" parent="base.menu_base_fleet_repair"/>
+         <record id="all_job_action" model="ir.actions.act_window">
+            <field name="name">Job Orders</field>
+            <field name="res_model">fleet.workshop</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[]</field>
+        </record>
+
+
+        <!--        menus-->
+         <menuitem id="reception_all_job_menu" sequence="20" action="all_job_action" name="All Job"
+                  parent="menu_fleet_mechanic_menu"/>
+
+
+    </data>
+</odoo>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="tech_lines_view_tree" model="ir.ui.view">
+            <field name="name">Technitians</field>
+            <field name="model">available.technician.line</field>
+            <field name="arch" type="xml">
+                <tree string="Technicians">
+                    <field name="employee_id"/>
+                    <field name="available"/>
+                    <field name="sign_in"/>
+                    <field name="sign_out"/>
+                    <field name="breakfast_start"/>
+                    <field name="breakfast_end"/>
+                    <field name="dhuhr_start"/>
+                    <field name="dhuhr_end"/>
+                    <field name="asr_start"/>
+                    <field name="asr_end"/>
+                    <field name="busy"/>
+                </tree>
+            </field>
+        </record>
+        <record id="available_technician_line_view_searh" model="ir.ui.view">
+            <field name="name">available.technician.line.search</field>
+            <field name="model">available.technician.line</field>
+            <field name="arch" type="xml">
+                <search string="Technitians">
+                    <group string="Filter By">
+                        <filter name="by_today" string="Today"
+                                domain="[('today_date','=',time.strftime('%%Y-%%m-%%d'))]"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="idle_tech_action" model="ir.actions.act_window">
+            <field name="name">Idle Technitians</field>
+            <field name="res_model">available.technician.line</field>
+            <field name="view_mode">tree</field>
+            <field name="search_view_id" ref="available_technician_line_view_searh"/>
+            <field name="context">{'search_default_by_today': 1}</field>
+            <field name="domain">[('busy', '=', False),('available', '=', True)]</field>
+        </record>
+
+        <menuitem id="idle_tech_menu" sequence="3" action="idle_tech_action" name="Idle Technicians"
+                  parent="menu_fleet_mechanic_menu"/>
+
+        <record id="busy_tech_action" model="ir.actions.act_window">
+            <field name="name">Busy Technitians</field>
+            <field name="res_model">available.technician.line</field>
+            <field name="view_mode">tree</field>
+            <field name="search_view_id" ref="available_technician_line_view_searh"/>
+            <field name="context">{'search_default_by_today': 1}</field>
+            <field name="domain">[('busy', '=', True),('available', '=', True)]</field>
+        </record>
+
+        <menuitem id="busy_tech_menu" sequence="4" action="busy_tech_action" name="Busy Technicians"
+                  parent="menu_fleet_mechanic_menu" />
+
+
+    </data>
+</odoo>

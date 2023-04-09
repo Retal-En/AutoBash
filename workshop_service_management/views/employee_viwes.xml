@@ -27,13 +27,13 @@
             name=" Mechanic Workorder"
             parent="base.menu_base_fleet_repair"
             id="menu_fleet_mechanic_menu"
-            sequence="6"
+            sequence="20"
     />
     <menuitem
             name="Mechanic"
             parent="menu_fleet_mechanic_menu"
             id="menu_fleet_mechanic_submenu"
-            sequence="1"
+            sequence="10"
             action="open_view_employee_list_my_8"
     />
 </odoo>

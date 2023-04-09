@@ -18,9 +18,19 @@
                     <field name="brand_id"/>
                     <field name="model_year"/>
                     <field name="part_number"/>
-                    
-
                 </xpath>
+
+                  <xpath expr="//notebook/page[@name='general_information']" position="after">
+                <page  name="alternatives" string="Replacement/Alternative Part NO" >
+                    <field name="product_alternatives_ids" >
+                        <tree string="Replacement Number(s)" editable="bottom">
+                            <field name="name"/>
+                            <field name="alternative_date"/>
+                            <field name="alternative_qty"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
             </field>
         </record>
     </data>

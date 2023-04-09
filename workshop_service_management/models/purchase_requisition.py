@@ -35,9 +35,7 @@ class PurchaseRequisition(models.Model):
         help='Fuel Used by the vehicle')
     guarantee = fields.Selection([('yes', 'On'), ('no', 'Off')], string='Guarantee?')
     job_controller_id = fields.Many2one('res.users', string='Job Controller', default=lambda self: self.env.user)
-    user_id = fields.Many2one('res.users', string='Assigned to')
     supplier_quotation = fields.Binary(string="Supplier Quotations")
-    supplier_suggested = fields.Many2one('res.partner',string="Supplier Suggested")
     department_id = fields.Many2one('hr.department', string='Department')
     price_ratio = fields.Float(string="Price Ratio")
     quality_ratio = fields.Float(string="Quality Ratio")
@@ -56,6 +54,8 @@ class PurchaseRequisition(models.Model):
     workshop_id = fields.Many2one('fleet.workshop', string="Source Document" ,readonly=True)
     requisition_line_ids = fields.One2many('purchase.requisition.line', 'purchase_id', string="Purchase")
     total = fields.Float( compute='_compute_all_price' ,store=True)
+    nots = fields.Text(string='Nots')
+
 
     @api.depends('requisition_line_ids.price_total',)
     def _compute_all_price(self):
@@ -132,8 +132,7 @@ class PurchaseRequisitionLine(models.Model):
 
     product_id = fields.Many2one('product.product', string='Name', domain=[('detailed_type', '=', 'service')])
     purchase_id = fields.Many2one('purchase.requisition', string='fleet Purchase')
-
-    name = fields.Char(string='Description')
+    name = fields.Text(string='Description')
     default_code = fields.Char(string='Product Code')
     uom_id = fields.Many2one('uom.uom', 'Unit of Measure')
     quantity = fields.Float(string='Quantity', required=True, default=1)

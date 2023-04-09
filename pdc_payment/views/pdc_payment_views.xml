@@ -132,13 +132,6 @@
                 action="pdc_payment_receive_action"
                 sequence="5"/>
 
-<!-- installment menu items in sales  -->
-    <menuitem
-                id="in_pdc_payment_installment_menu"
-                name="Installments PDC"
-                parent="sale_car.sale_installment_menu"
-                action="pdc_payment_receive_action"
-                sequence="5"/>
 
      <!-- Action OUT-->
         <record model="ir.actions.act_window" id="pdc_payment_send_action">

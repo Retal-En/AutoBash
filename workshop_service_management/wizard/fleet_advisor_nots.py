@@ -27,6 +27,7 @@ class fleet_advisor_nots(models.TransientModel):
                 'appointment_description': self.appointment_id.description,
                 'sequence': self.env['ir.sequence'].next_by_code('fleet.workshop') or _('New'),
                 'fleet_id': self.appointment_id.fleet_id.id,
+                'payment_mode': 'cash',
                 'license_plate': self.appointment_id.license_plate,
                 'model_id': self.appointment_id.fleet_id.model_id.id,
                 'model_year': self.appointment_id.fleet_id.model_year,

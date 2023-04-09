@@ -3,52 +3,24 @@
     <template id="report_document">
 
         <t t-call="web.html_container">
-            <div class="header" style="border-bottom: 4px solid #0C1793;">
-                <div class="row">
-                    <div style='border:bottom border'>
-                        <center>
-                            <table>
-                                <tr>
-                                    <td>
-                                        <center>
-                                            <img src="/workshop_service_management/static/logo/logo.png" width="100"/>
-                                        </center>
-                                    </td>
-                                    <td width="130%">
-                                        <center>
-                                            <p>
-                                                <b>
-                                                    <t t-esc="user_id.company_id.name"/>
-                                                </b>
-                                            </p>
-                                        </center>
-
-                                    </td>
-                                    <td>
-                                        <center>
-                                            <img src="/workshop_service_management/static/logo/logo.png" width="100"/>
-                                        </center>
-                                    </td>
-                                </tr>
-                            </table>
-                        </center>
-                    </div>
-                </div>
-            </div>
             <div class="article">
                 <table class="table table-condensed table-bordered" style="width: 100%">
                     <thead>
                         <tr>
                             <td>
-                                Job Order No #
-                            </td>
-                            <td>
+                                <strong>
+                                    Job Order No #
+                                </strong>
                                 <span t-field="o.sequence"/>
                             </td>
-                            <td>Service Advisor :</td>
                             <td>
+                                <strong>
+                                    Service Advisor #
+                                </strong>
                                 <span t-field="o.user_id"/>
                             </td>
+
+
                         </tr>
                     </thead>
                 </table>
@@ -60,7 +32,7 @@
                                 <td>
                                     <span t-field="line.client_id.name"/>
                                 </td>
-                                <td>VIN NO:</td>
+                                <td>Palte NO:</td>
                                 <td>
                                     <span t-field="line.vin_sn"/>
                                 </td>
@@ -76,12 +48,16 @@
                                 </td>
                             </tr>
 
-<!--                            <tr>-->
-<!--                                <td>Mobile NO# :</td>-->
-<!--                                <td>-->
-<!--                                    <span t-field="line.client_id.mobile"/>-->
-<!--                                </td>-->
-<!--                            </tr>-->
+                            <tr>
+                                <td>Mobile NO# :</td>
+                                <td>
+                                    <span t-field="line.client_id.mobile"/>
+                                </td>
+                                <td>VIN# :</td>
+                                <td>
+                                    <span t-field="line.client_id.mobile"/>
+                                </td>
+                            </tr>
 
                             <tr>
                                 <td>Date Time :</td>

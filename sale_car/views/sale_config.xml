@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Discount Matrix -->
+        <record id="discount_matrix_tree" model="ir.ui.view">
+            <field name="model">discount.matrix</field>
+            <field name="arch" type="xml">
+                <tree string="Discount Matrix">
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+        <record id="discount_matrix_form" model="ir.ui.view">
+            <field name="name">discount.matrix.form</field>
+            <field name="model">discount.matrix</field>
+            <field name="arch" type="xml">
+                <form string="Discount Matrix">
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                            <field name="payment_type"/>
+                        </group>
+                        <group col="4">
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                        </group>
+                        <notebook>
+                            <page string="Levels">
+                                <field name="level_line_ids" nolabel="1">
+                                    <tree editable="bottom">
+                                        <field name="name"/>
+                                        <field name="payment_method" invisible="1"/>
+                                        <field name="position_id"/>
+                                        <field name="min_allowed"/>
+                                        <field name="max_allowed"/>
+                                        <field name="commission_percentage"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Accounting">
+                                <group>
+                                    <field name="discount_account_id"/>
+                                    <field name="income_account_id"/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="action_discount_matrix" model="ir.actions.act_window">
+            <field name="name">Discount Matrix</field>
+            <field name="res_model">discount.matrix</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        <menuitem name="Discount Matrix"
+                  parent="sale.menu_sale_config"
+                  id="menu_hr_university"
+                  sequence="3"
+                  action="action_discount_matrix"/>
+
+
+        <!-- Commission Policy -->
+        <record id="view_incentive_category_form" model="ir.ui.view">
+            <field name="name">incentive.category.form</field>
+            <field name="model">incentive.category</field>
+            <field name="arch" type="xml">
+                <form string="Commission Policy Information">
+                    <sheet string="Incentive Category">
+                        <group col="2">
+                            <field name="name"/>
+                        </group>
+                        <group col="4">
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                        </group>
+                        <!--                        <group string="Achieved Percentage(%)">-->
+                        <!--                            <group col="4">-->
+                        <!--                                <field name="achieved_target" />-->
+                        <!--                                <field name="achieved_target_than1" />-->
+                        <!--                                <field name="achieved_target_than2" />-->
+                        <!--                                <field name="unachieved_target" />-->
+                        <!--                            </group>-->
+                        <!--                        </group>-->
+                        <notebook>
+                            <page string="Commission Percentage(%)">
+                                <group col="4">
+                                    <field name="com"/>
+                                    <field name="actual_com"/>
+                                    <field name="sales_rep"/>
+                                    <field name="supervision_com"/>
+                                    <field name="admin_mark_com"/>
+                                    <field name="manager"/>
+                                    <field name="sale_market"/>
+                                </group>
+                            </page>
+                        </notebook>
+                        <!--                        <notebook>-->
+                        <!--                            <page string="Deal Commission(%)">-->
+                        <!--                                <field name="commission_ids" nolabel="1">-->
+                        <!--                                    <tree editable="bottom">-->
+                        <!--                                        <field name="payment_method"/>-->
+                        <!--                                        <field name="percentage"/>-->
+                        <!--                                    </tree>-->
+                        <!--                                </field>-->
+                        <!--                            </page>-->
+                        <!--                        </notebook>-->
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="view_incentive_category_tree" model="ir.ui.view">
+            <field name="name">view.incentive.category.tree</field>
+            <field name="model">incentive.category</field>
+            <field name="arch" type="xml">
+                <tree string="Incentive Category">
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+        <record id="action_incentive_category" model="ir.actions.act_window">
+            <field name="name">Incentive Category</field>
+            <field name="res_model">incentive.category</field>
+            <!--            <field name="view_type">form,tree</field>-->
+            <field name="view_mode">tree,form</field>
+            <!--            <field name="view_id" ref="view_incentive_category_tree"/>-->
+            <!--            <field name="view_id" ref="view_incentive_category_form"/>-->
+        </record>
+
+        <menuitem name="Commission Policy"
+                  parent="sale.menu_sale_config"
+                  id="menu_commission_policy"
+                  sequence="3"
+                  action="action_incentive_category"/>
+
+        <!-- Service Configuration -->
+        <record id="view_service_config_form" model="ir.ui.view">
+            <field name="name">service.config.form</field>
+            <field name="model">service.config</field>
+            <field name="arch" type="xml">
+                <form string="Insurance and Registration Information">
+                    <sheet string="Incentive Category">
+                        <group>
+                            <field name="date"/>
+                            <field name="pdi_locaton"/>
+                        </group>
+                        <group col="4" string="Registration ">
+                            <field name="rec_product"/>
+                            <field name="rec_price" invisible="1"/>
+                            <field name="rec_locaton" invisible="1"/>
+                        </group>
+                        <group col="4" string="Insurance">
+                            <field name="ins_product"/>
+                            <field name="ins_price" invisible="1"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="view_service_config_tree" model="ir.ui.view">
+            <field name="name">view.service.config.tree</field>
+            <field name="model">service.config</field>
+            <field name="arch" type="xml">
+                <tree string="Service Information">
+                    <field name="date"/>
+                    <field name="rec_product"/>
+                    <field name="rec_price" invisible="1"/>
+                    <field name="ins_product"/>
+                    <field name="ins_price" invisible="1"/>
+                </tree>
+            </field>
+        </record>
+        <record id="action_service_config" model="ir.actions.act_window">
+            <field name="name">Insurance and Registration Information</field>
+            <field name="res_model">service.config</field>
+            <!--            <field name="view_type">form</field>-->
+            <field name="view_mode">tree,form</field>
+            <!--            <field name="view_id" ref="view_service_config_tree"/>-->
+        </record>
+
+        <menuitem name="Service Configuration"
+                  parent="sale.menu_sale_config"
+                  id="menu_service_config"
+                  sequence="6"
+                  action="action_service_config"/>
+
+
+        <!-- Down Payment Configuration -->
+        <record id="view_down_config_form" model="ir.ui.view">
+            <field name="name">down.payment.config.form</field>
+            <field name="model">down.payment.config</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet string="Down Payment">
+                        <group>
+                            <field name="date"/>
+                            <field name="percentage"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="view_down_config_tree" model="ir.ui.view">
+            <field name="name">down.payment.config.tree</field>
+            <field name="model">down.payment.config</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="date"/>
+                    <field name="percentage"/>
+                </tree>
+            </field>
+        </record>
+        <record id="action_down_config" model="ir.actions.act_window">
+            <field name="name">Down Payment Configuration</field>
+            <field name="res_model">down.payment.config</field>
+            <!--            <field name="view_type">form</field>-->
+            <field name="view_mode">tree,form</field>
+            <!--            <field name="view_id" ref="view_down_config_tree"/>-->
+        </record>
+
+        <!--        <menuitem name="Down Payment Configuration" parent="sale.menu_sale_config"  id="menu_down_config"  action="action_down_config" groups="is_sales_custmization.group_autobash_care_user"/>-->
+
+        <!-- Finance Configuration -->
+        <record id="view_finance_config_form" model="ir.ui.view">
+            <field name="name">down.payment.config.form</field>
+            <field name="model">finance.config</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet string="Finance">
+                        <group>
+                            <field name="value"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="view_finance_config_tree" model="ir.ui.view">
+            <field name="name">finance.config.tree</field>
+            <field name="model">finance.config</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="value"/>
+                </tree>
+            </field>
+        </record>
+        <record id="action_finance_config" model="ir.actions.act_window">
+            <field name="name">Finance Configuration</field>
+            <field name="res_model">finance.config</field>
+            <!--            <field name="view_type">form</field>-->
+            <field name="view_mode">tree,form</field>
+            <!--            <field name="view_id" ref="view_finance_config_tree"/>-->
+        </record>
+
+        <menuitem name="Finance Configuration"
+                  parent="sale.menu_sale_config"
+                  id="menu_finance_config"
+                  sequence="3"
+                  action="action_finance_config"/>
+
+        <record id="view_installment_config_form" model="ir.ui.view">
+            <field name="name">installment.config.form</field>
+            <field name="model">installment.config</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet string="Installment">
+                        <div class="oe_button_box" name="button_box">
+                            <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive">
+                                <field name="active" widget="boolean_button" options='{"terminology": "archive"}'/>
+                            </button>
+                        </div>
+                        <group col="2">
+                            <field name="name"/>
+                        </group>
+                        <group>
+                            <field name="model" domain="[('is_car', '=', 'is_car')]"/>
+                            <field name="finance" invisible="1"/>
+                            <field name="profit"/>
+                            <field name="down_payment"/>
+                            <field name="no_ofmanth"/>
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_installment_config_tree" model="ir.ui.view">
+            <field name="name">installment.config.tree</field>
+            <field name="model">installment.config</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="model"/>
+                    <field name="finance"/>
+                    <field name="profit"/>
+                    <field name="down_payment"/>
+                    <field name="no_ofmanth"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_installment_config" model="ir.actions.act_window">
+            <field name="name">Installment Configuration</field>
+            <field name="res_model">installment.config</field>
+            <!--            <field name="view_type">form</field>-->
+            <field name="view_mode">tree,form</field>
+            <!--            <field name="view_id" ref="view_installment_config_tree"/>-->
+        </record>
+
+        <menuitem name="Installment Configuration"
+                  parent="sale.menu_sale_config"
+                  id="menu_installment_config"
+                  sequence="3"
+                  action="action_installment_config"/>
+
+    </data>
+</odoo>

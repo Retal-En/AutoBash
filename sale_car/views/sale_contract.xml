@@ -106,7 +106,7 @@
         id="sale_contract_menu"
         parent="sale.sale_menu_root"
         name="Sales Contracts" 
-        sequence="50"/>
+        sequence="5"/>
     <menuitem 
         name="Contracts"
         parent="sale_contract_menu" 

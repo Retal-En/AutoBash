@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <menuitem id="job_controller_menu" name="Job Controller" parent="base.menu_base_fleet_repair"/>
+         <record id="all_job_action" model="ir.actions.act_window">
+            <field name="name">Job Orders</field>
+            <field name="res_model">fleet.workshop</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[]</field>
+        </record>
+
+        <record id="reception_job_action" model="ir.actions.act_window">
+            <field name="name">Job Orders</field>
+            <field name="res_model">fleet.workshop</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('state', '=', 'reception')]</field>
+        </record>
+        <record id="controller_repair_job_action" model="ir.actions.act_window">
+            <field name="name">Job Orders</field>
+            <field name="res_model">fleet.workshop</field>
+            <field name="domain">[('state', '=', 'repair')]</field>
+        </record>
+        <record id="controller_quality_check_job_action" model="ir.actions.act_window">
+            <field name="name">Job Orders</field>
+            <field name="res_model">fleet.workshop</field>
+            <field name="domain">[('state', '=', 'quality_check')]</field>
+        </record>
+
+        <!--        menus-->
+         <menuitem id="reception_all_job_menu" sequence="0" action="all_job_action" name="All Job"
+                  parent="job_controller_menu"/>
+        <menuitem id="reception_job_menu" sequence="1" action="reception_job_action" name="Reception"
+                  parent="job_controller_menu"/>
+        <menuitem id="repair_job_menu" sequence="2" action="controller_repair_job_action" name="Repair"
+                  parent="job_controller_menu"/>
+        <menuitem id="quality_check_job_menu" sequence="3" action="controller_quality_check_job_action" name="Quality Check"
+                  parent="job_controller_menu"/>
+
+    </data>
+</odoo>

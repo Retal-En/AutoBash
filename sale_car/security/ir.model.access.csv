@@ -2,3 +2,13 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_res_order_group_erp_ma,res_order_group_erp_manager,model_sale_order_approval,,1,1,1,1
 access_res_contract_group_erp_ma,res_contract_group_erp_manager,model_sale_contract,,1,1,1,1
 access_res_installment_group_erp_ma,res_installment_group_erp_manager,model_sale_installment,,1,1,1,1
+access_res_finance_ma,res_finance_gp_manager,model_finance_config,,1,1,1,0
+access_res_order_approvup_erp_ma,res_order_gr_approve_manager,model_sale_approve_line,,1,1,1,0
+access_res_discount_ma,res_discount_gp_manager,model_discount_matrix,,1,1,1,1
+access_res_discount_line_group_erp_ma,res_discount_line_group_erp_manager,model_discount_matrix_line,,1,1,1,1
+access_res_incentive_le_group_erp_ma,res_incentive_group_erp_manager,model_incentive_category,,1,1,1,1
+access_res_commission_le_group_erp_ma,res_commission_group_erp_manager,model_deal_commission,,1,1,1,1
+access_res_third_party_le_group_erp_ma,res_third_party_group_erp_manager,model_third_party_percentage,,1,1,1,1
+access_res_service_group_erp_ma,res_service_group_erp_manager,model_service_config,,1,1,1,1
+access_res_down_payment_group_erp_ma,res_down_payment_group_erp_manager,model_down_payment_config,,1,1,1,1
+access_res_installment_conf_group_erp_ma,res_installment_conf_group_erp_manager,model_installment_config,,1,1,1,1

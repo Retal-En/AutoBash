@@ -7,11 +7,13 @@
             <form string="Fleet Purchase Requisition">
                 <header>
                     <button name="button_confirm" states="draft" string="Confirm" type="object" class="oe_highlight"/>
-                    <button name="button_department_manager" states="confirm" string="Department Manager Approved" type="object"
+                    <button name="button_department_manager" states="confirm" string="Department Manager Approved"
+                            type="object"
                             class="oe_highlight"/>
-                    <button name="button_purchase_officer" states="department_manager" string="Purchase OfficerApproved" type="object"
+                    <button name="button_purchase_officer" states="department_manager" string="Purchase OfficerApproved"
+                            type="object"
                             class="oe_highlight"/>
-                                <button name="button_purchase" string="derift" type="object"/>
+                    <button name="button_purchase" string="derift" type="object"/>
 
                     <button name="button_concel" states="confirm,department_manager" string="Cancel" type="object"/>
                     <field name="state" widget="statusbar"
@@ -38,14 +40,12 @@
                             <field name="purchase_type"
                             />
                             <field name="job_controller_id"/>
-                            <field name="user_id"/>
 
                         </group>
                         <group>
                             <field name="partner_id"/>
                             <field name="supplier_quotation"
                                    attrs="{'invisible':[('purchase_type','!=','parts_requisition')],'required':[('purchase_type','=','parts_requisition')]}"/>
-                            <field name="supplier_suggested"/>
                             <field name="workshop_id"/>
                         </group>
                     </group>
@@ -55,21 +55,20 @@
                                    attrs="{'readonly': [('state', '!=', 'draft')]}">
                                 <tree editable="bottom">
                                     <field name="product_id"/>
+                                    <field name="name"/>
                                     <field name="product_qty" readonly="1"/>
                                     <field name="uom_id"/>
                                     <field name="quantity"/>
-                                    <field name="price_unit"/>
-                                    <field name="taxes_id" widget="many2many_tags"/>
-                                    <field name="price_total"/>
+<!--                                    <field name="price_total"/>-->
                                 </tree>
                             </field>
 
-                            <group name="note_group" col="6" class="mt-2 mt-md-0">
-                                <group class="oe_subtotal_footer oe_right" colspan="2" name="sale_total">
-                                    <field name="total" force_save="1" colspan="2"/>
-                                </group>
-                                <div class="oe_clear"/>
-                            </group>
+<!--                            <group name="note_group" col="6" class="mt-2 mt-md-0">-->
+<!--                                <group class="oe_subtotal_footer oe_right" colspan="2" name="sale_total">-->
+<!--                                    <field name="total" force_save="1" colspan="2"/>-->
+<!--                                </group>-->
+<!--                                <div class="oe_clear"/>-->
+<!--                            </group>-->
 
 
                         </page>
@@ -85,6 +84,9 @@
 
                         </page>
                         <page string="Notes">
+                            <group>
+                                <field name="nots"/>
+                            </group>
 
                         </page>
                     </notebook>

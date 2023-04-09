@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="auto_product_template_inherit_1" model="ir.ui.view">
+            <field name="name">product.template.form</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_only_form_view" />
+            <field name="arch" type="xml">
+                <field name="default_code" position="before">
+                    <field name="is_car"/>
+
+                    <field name="model_year" attrs="{'invisible':[('is_car','!=','is_car')],'required':[('is_car','=','is_car')]}"/>
+                    <field name="brand_id" attrs="{'required':[('is_car','=','is_car')]}"/>
+                    <field name="fuel" attrs="{'invisible':[('is_car','!=','is_car')],'required':[('is_car','=','is_car')]}"/>
+                    <field name="drive_train" attrs="{'invisible':[('is_car','!=','is_car')],'required':[('is_car','=','is_car')]}"/>
+                    <field name="insurance_price" attrs="{'invisible':[('is_car','!=','is_car')],'required':[('is_car','=','is_car')]}"/>
+                    <field name="registration_price" attrs="{'invisible':[('is_car','!=','is_car')],'required':[('is_car','=','is_car')]}"/>
+
+                </field>
+                <!--                <field name="list_price" position="after">-->
+                <!--                    <field name="crf_price" attrs="{'invisible':[('is_car','!=','is_car')],'required':[('is_car','=','is_car')]}"/>-->
+
+                <!--                </field>-->
+            </field>
+        </record>
+
+        <record id="view_product_template_search_inherit" model="ir.ui.view">
+            <field name="name">product.template.inherit</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_search_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='name']" position="after">
+                    <field name="model_year" string="Model Year" filter_domain="[('model_year','ilike',self)]"/>
+                    <field name="brand_id" string="Brand" filter_domain="[('brand','ilike',self)]"/>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- <record model="ir.ui.view" id="product_template_kanban_auto_view">
+            <field name="name">Product Template Kanban Stock</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_kanban_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//small[@t-if='record.default_code.value']"  position="after">
+                    <small t-if="record.model_year.value"><field name="model_year"/></small>
+                </xpath>
+            </field>
+        </record> -->
+
+
+        <record id="view_product_product_search_inherit" model="ir.ui.view">
+            <field name="name">product.product.inherit</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_search_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='name']" position="after">
+                    <field name="model_year" string="Model Year" filter_domain="[('model_year','ilike',self)]"/>
+                    <field name="brand_id" string="Brand" filter_domain="[('brand','ilike',self)]"/>
+                </xpath>
+            </field>
+        </record>
+        <record id="auto_product_product_inherit" model="ir.ui.view">
+            <field name="name">product.product.form</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_normal_form_view" />
+            <field name="arch" type="xml">
+                <field name="categ_id" position="after">
+                    <field name="is_car"/>
+                    <field name="model_year" attrs="{'invisible':[('is_car','!=','is_car')],'required':[('is_car','=','is_car')]}"/>
+                    <field name="brand_id" attrs="{'required':[('is_car','=','is_car')]}"/>
+                    <field name="displacement" invisible="1"/>
+                    <field name="transmission" invisible="1"/>
+                    <field name="fuel" attrs="{'invisible':[('is_car','!=','is_car')],'required':[('is_car','=','is_car')]}"/>
+                    <field name="drive_train" attrs="{'invisible':[('is_car','!=','is_car')],'required':[('is_car','=','is_car')]}"/>
+                    <field name="insurance_price" attrs="{'invisible':[('is_car','!=','is_car')],'required':[('is_car','=','is_car')]}"/>
+                    <field name="registration_price" attrs="{'invisible':[('is_car','!=','is_car')],'required':[('is_car','=','is_car')]}"/>
+                    <field name="car_color" invisible="1"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="view_car_product_template_tree" model="ir.ui.view">
+            <field name="name">product.template.car.tree.inherit</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_tree_view"/>
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+                    <field name="is_car" invisible="1"/>
+                    <field name="model_year" attrs="{'invisible':[('is_car', '!=', 'is_car')]}"/>
+                    <field name="brand_id" attrs="{'invisible':[('is_car', '!=', 'is_car')]}"/>
+                </field>
+            </field>
+        </record>
+
+
+        <record id="view_car_product_tree" model="ir.ui.view">
+            <field name="name">product.car.tree.inherit</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_product_tree_view"/>
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+                    <field name="is_car" invisible="1"/>
+                    <field name="model_year" attrs="{'invisible':[('is_car', '!=', 'is_car')]}"/>
+                    <field name="brand_id" attrs="{'invisible':[('is_car', '!=', True)]}"/>
+                </field>
+            </field>
+        </record>
+
+
+        <record model="ir.ui.view" id="product_kanban_auto_view">
+            <field name="name">Product Kanban Stock</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_kanban_view"/>
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+                    <small t-if="record.model_year.value"><field name="model_year"/></small>
+                </field>
+                <ul position="inside">
+                    <field name="type" invisible="1"/>
+                    <li t-if="record.type.raw_value == 'product'">On hand: <field name="qty_available"/> <field name="uom_id"/></li>
+                </ul>
+            </field>
+        </record>
+        <record id="stock.stock_product_normal_action" model="ir.actions.act_window">
+            <field name="view_mode">kanban,tree,form</field>
+        </record>
+        <record id="product.product_normal_action_sell" model="ir.actions.act_window">
+            <field name="view_id" ref="product_kanban_auto_view"/>
+        </record>
+
+        <record id="sale_production_lot_view_form" model="ir.ui.view">
+            <field name="name">stock.production.lot.form</field>
+            <field name="model">stock.production.lot</field>
+            <field name="inherit_id" ref="stock.view_production_lot_form"/>
+            <field name="arch" type="xml">
+                <field name="ref" position="before">
+                    <field name="lot_state" widget="radio" groups="stock.group_production_lot"/>
+                    <!-- <field name="is_car"  groups="stock.group_production_lot" invisible="1"/> -->
+                    <!-- <field name="engine_no"  groups="stock.group_production_lot" attrs="{'invisible':[('is_car','!=','is_car')],'required':[('is_car','=','is_car')]}"/>
+                    <field name="vehicle"  groups="stock.group_production_lot" attrs="{'invisible':[('is_car','!=','is_car')]}" readonly="1"/> -->
+                </field>
+            </field>
+        </record>
+
+        <record id="sale_production_lot_view_tree" model="ir.ui.view">
+            <field name="name">stock.production.lot.tree</field>
+            <field name="model">stock.production.lot</field>
+            <field name="inherit_id" ref="stock.view_production_lot_tree"/>
+            <field name="arch" type="xml">
+                <field name="create_date" position="before">
+                    <field name="lot_state" groups="stock.group_production_lot"/>
+                </field>
+                <tree position="attributes">
+                    <attribute name="decoration-muted"> lot_state == 'hold'</attribute>
+                    <attribute name="decoration-danger">lot_state not in ['hold','normal'] </attribute>
+                </tree>
+            </field>
+        </record>
+
+       <!--  <record id="inherit_view_stock_quant_form" model="ir.ui.view">
+            <field name="name">stock.quant.form</field>
+            <field name="model">stock.quant</field>
+            <field name="inherit_id" ref="stock.view_stock_quant_form"/>
+            <field name="arch" type="xml">
+                <field name="lot_id" position="after">
+                    <field name="product_state" groups="stock.group_production_lot"/>
+                </field>
+            </field>
+        </record> -->
+
+        <record id="inherit_view_stock_quant_tree" model="ir.ui.view">
+            <field name="name">stock.quant.tree</field>
+            <field name="model">stock.quant</field>
+            <field name="inherit_id" ref="stock.view_stock_quant_tree"/>
+            <field name="arch" type="xml">
+                <field name="lot_id" position="after">
+                    <field name="product_state" groups="stock.group_production_lot"/>
+                </field>
+                <tree position="attributes">
+                    <attribute name="decoration-muted"> product_state == 'hold'</attribute>
+                    <attribute name="decoration-danger">product_state not in ['hold','normal'] </attribute>
+                </tree>
+            </field>
+        </record>
+
+        <record id="product_pricelist_view_inherit" model="ir.ui.view">
+            <field name="name">product.pricelist.form</field>
+            <field name="model">product.pricelist</field>
+            <field name="inherit_id" ref="product.product_pricelist_view" />
+            <field name="arch" type="xml">
+                <field name="country_group_ids" position="before">
+                    <field name="payment_method"/>
+                </field>
+
+            </field>
+        </record>
+
+
+        <record id="action_hold_production_lot_tree_view" model="ir.actions.act_window">
+            <field name="name">Hold Product</field>
+            <field name="res_model">stock.quant</field>
+            <!-- <field name="view_type">form</field> -->
+            <field name="domain"> [('product_state', '=', 'hold'),('product_id.is_car','=',True),('location_id.usage','=', 'internal')]</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="stock.view_stock_quant_tree"/>
+        </record>
+
+        <menuitem name="Hold Product" parent="sale.product_menu_catalog"  id="menu_hold_product_view"  action="action_hold_production_lot_tree_view"/>
+
+        <record id="action_block_production_lot_tree_view" model="ir.actions.act_window">
+            <field name="name">Block Product</field>
+            <field name="res_model">stock.quant</field>
+            <!-- <field name="view_type">form</field> -->
+            <field name="domain">[('product_state','not in', ['hold','normal',False]),('product_id.is_car','=',True),('location_id.usage','=', 'internal')]</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="stock.view_stock_quant_tree"/>
+        </record>
+
+        <menuitem name="Block Product" parent="sale.product_menu_catalog"  id="menu_block_product_view"  action="action_block_production_lot_tree_view"/>
+
+
+
+<!--         <record id="view_auto_picking_inherit_form" model="ir.ui.view">
+            <field name="name">stock.picking.form.inherit</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_form"/>
+            <field name="arch" type="xml">
+
+                <field name="show_mark_as_todo" position="after">
+                    <field name="is_gate_pass" invisible="1"/>
+                    <field name="is_gate_pass_ap1" invisible="1"/>
+                    <field name="is_gate_pass_ap2" invisible="1"/>
+                </field>
+
+                <xpath expr="//button[@name='action_confirm']" position="before">
+                    <button name="sale_admin_app" attrs="{'invisible': [('is_gate_pass', '=', False)]}" string="Sales Admin App" type="object" class="oe_highlight" groups="is_sales_custmization.group_sales_admin"/>
+                    <button name="finance_app" attrs="{'invisible': [('is_gate_pass_ap1', '=', False)]}" string="Finance Dep App" type="object" class="oe_highlight" groups="is_sales_custmization.group_finance_dep"/>
+                    <button name="credit_controller_app" attrs="{'invisible': [('is_gate_pass_ap2', '=', False)]}" string="Credit Controller App" type="object" class="oe_highlight" groups="is_sales_custmization.group_credit_controller"/>
+
+                </xpath>
+
+            </field>
+
+        </record> -->
+
+    </data>
+</odoo>
