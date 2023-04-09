@@ -14,3 +14,4 @@ from . import sale_order
 from . import fleet_appointment
 from . import crm
 from . import available_technician
+from . import account_move

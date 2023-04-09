@@ -26,7 +26,7 @@
                 </xpath>
 
                 <xpath expr="//group[1]" position="after">
-                    <group string="Customer Information">
+                    <group string="Customer Information" >
                         <group>
                             <field name="gender"  widget="radio" options="{'horizontal': true}"/>
                             <field name="id_type"  widget="radio" options="{'horizontal': true}"/>

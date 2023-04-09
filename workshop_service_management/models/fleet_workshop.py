@@ -59,6 +59,7 @@ class FleetWorkshop(models.Model):
         ('repar', 'Repar'),
         ('quality_check', 'Quality Check'),
         ('delivery_invoicing', 'Delivery & Invoicing'),
+        ('jet_bus', 'GitBuss'),
         ('follow_up', 'Follow Up'),
         ('closed', 'Closed'),
     ], 'Status', default="reception", readonly=True, copy=False, help="Gives the status of the fleet repairing.")
@@ -100,19 +101,98 @@ class FleetWorkshop(models.Model):
     #
     company_id = fields.Many2one('res.company', string="Company", default=lambda self: self.env.user.company_id,
                                  readonly=True)
-    warehouse_id = fields.Many2one('stock.warehouse', 'Temp Warehouse')
-    source_warehouse_id = fields.Many2one('stock.warehouse', 'From Warehouse')
-    # account
+    location_id = fields.Many2one('stock.location', 'Source Location')
+    location_des_id = fields.Many2one('stock.location', 'Destination Location')
 
-    redo_account_id = fields.Many2one('account.account', string="Account Redo")
-    insurance_account_id = fields.Many2one('account.account', string="Account Insurance")
-    warranty_account_id = fields.Many2one('account.account', string="Account Warranty")
-    cash_account_id = fields.Many2one('account.account', string="Account Cash")
-    goodwill_account_id = fields.Many2one('account.account', string="Account Goodwill")
-    workshop_account_id = fields.Many2one('account.account', string="Account Workshop")
-    promotion_account_id = fields.Many2one('account.account', string="Account Promotion")
-    company_cars_account_id = fields.Many2one('account.account', string="Account Company Cars")
-    sales_used_cars_account_id = fields.Many2one('account.account', string="Account Sales & Used Cars")
+
+    def button_delivery_invoicing(self):
+        invoice_lines =[]
+        account_move = self.env['account.move']
+        for task in self.task_line:
+            invoice_lines.append((0, 0, {
+                'name': task.product_id.name,
+                'product_id': task.product_id.id,
+                'quantity': 1,
+                'price_unit': task.total,
+            }))
+
+        for purchase in self.purchase_order_line:
+            invoice_lines.append((0, 0, {
+                'name': purchase.product_id.name,
+                'product_id': purchase.product_id.id,
+                'product_uom_id': purchase.uom_id.id,
+                'quantity': purchase.quantity,
+                'price_unit': purchase.price_total,
+                'tax_ids': purchase.taxes_id.id,
+
+            }))
+        for external in self.external_order_line:
+            invoice_lines.append((0, 0, {
+                'name': external.product_id.name,
+                'product_id': external.product_id.id,
+                'product_uom_id': external.uom_id.id,
+                'tax_ids': external.taxes_id,
+
+                'quantity': external.quantity,
+                'price_unit': external.price_total,
+            }))
+        for spare in self.spare_part_ids:
+            invoice_lines.append((0, 0, {
+                'name': spare.product_id.name,
+                'product_id': spare.product_id.id,
+                'product_uom_id': spare.uom_id.id,
+                'quantity': spare.quantity,
+                'price_unit': spare.price_total,
+            }))
+        vals = {
+            'partner_id': self.client_id.id,
+            'payment_mode': self.payment_mode,
+            'workshop_id': self.id,
+            'move_type': 'out_invoice',
+            'invoice_line_ids': invoice_lines,
+
+        }
+        account_move.create(vals)
+
+    def pickgin(self):
+
+        if self.purchase_order_line:
+            purchase_order = self.env['stock.picking'].create({
+                'picking_type_id': self.env.ref('stock.picking_type_out').id,
+                'location_id': self.env.ref('stock.stock_location_stock').id,
+                'partner_id': self.client_id.id,
+                'origin': self.sequence,
+                'location_dest_id': self.env.ref('stock.stock_location_customers').id,
+                'move_lines': [(0, 0, {
+                    'name': 'outgoing_shipment_avg_move',
+                    'product_id': rec.product_id.id,
+                    'product_uom_qty':rec.quantity,
+                    'product_uom': rec.uom_id.id,
+                    'location_id': self.env.ref('stock.stock_location_stock').id,
+                    'location_dest_id': self.env.ref('stock.stock_location_customers').id})
+                               for rec in self.purchase_order_line.filtered(lambda r: r.quantity > 0)
+                               ]
+            })
+            purchase_order.write({'state': 'assigned'})
+        if self.spare_part_ids:
+            spare_part = self.env['stock.picking'].create({
+                'picking_type_id': self.env.ref('stock.picking_type_out').id,
+                'location_id': self.env.ref('stock.stock_location_stock').id,
+                'partner_id': self.client_id.id,
+                'origin': self.sequence,
+                'location_dest_id': self.env.ref('stock.stock_location_customers').id,
+                'move_lines': [(0, 0, {
+                    'name': 'outgoing_shipment_avg_move',
+                    'product_id': rec.product_id.id,
+                    'product_uom_qty': rec.quantity,
+                    'product_uom': rec.uom_id.id,
+                    'location_id': self.location_des_id.id,
+                    'location_dest_id': self.env.ref('stock.stock_location_customers').id})
+                               for rec in self.spare_part_ids.filtered(lambda r: r.quantity > 0)
+                               ]
+            })
+            spare_part.write({'state': 'assigned'})
+
 
     @api.onchange('fleet_id')
     def onchange_fleet_id(self):
@@ -192,13 +272,14 @@ class FleetWorkshop(models.Model):
     @api.depends('purchase_count')
     def _comput_purchase_count(self):
         for record in self:
-            record.purchase_count = self.env['purchase.order'].search_count([('workshop_id', '=', record.id)])
+            record.purchase_count  =100
+            # record.purchase_count = self.env['purchase.order'].search_count([('workshop_id', '=', record.id)])
     def action_create_purchase_order(self):
         self.ensure_one()
         return {
             # 'name': _('%s Goals') % self.employee_id.name,
             'view_mode': 'form',
-            'res_model': 'purchase.requisition',
+            'res_model': 'requisition.order',
             'type': 'ir.actions.act_window',
             'target': 'current',
             # 'domain': [('employee_id', '=', self.client_id.id)],
@@ -214,7 +295,7 @@ class FleetWorkshop(models.Model):
         return {
             # 'name': _('%s Goals') % self.employee_id.name,
             'view_mode': 'form',
-            'res_model': 'purchase.requisition',
+            'res_model': 'requisition.order',
             'type': 'ir.actions.act_window',
             'target': 'current',
             # 'domain': [('employee_id', '=', self.client_id.id)],
@@ -267,9 +348,11 @@ class FleetWorkshop(models.Model):
         pass
     def print_job_card(self):
         return self.env.ref('workshop_service_management.report_workshop_quotation').report_action(self)
-    def button_draft(self):
-        for line in self:
-           line.write({'state': 'repar'})
+    def button_pre_delivery(self):
+        for x in self.task_line:
+            if any(x.filtered(lambda task: task.state not in ('done', 'cancel'))):
+                raise UserError(_('You cannot create a invoice which task is not done or cancel!'))
+            self.write({'state': 'quality_check'})
     def button_repair(self):
         for line in self:
             line.write({'state':'repar'})

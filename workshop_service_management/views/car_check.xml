@@ -7,8 +7,8 @@
         <field name="arch" type="xml">
             <form string="Car Quality Analysis">
                 <header>
-                    <button name="button_confirm" states="draft" string="Confirm" type="object" class="oe_highlight"/>
-                    <button name="button_draft" states="draft" string="Confirm" type="object" class="oe_highlight"/>
+                    <button name="button_confirm" string="Confirm" type="object" class="oe_highlight"/>
+                    <button name="button_draft"  string="Confirm----" type="object" class="oe_highlight"/>
                     <button name="button_concel" states="confirm" string="Cancel" type="object" class="oe_highlight"/>
 
                     <field name="state" widget="statusbar"
@@ -31,6 +31,7 @@
                         <field name="model_id"/>
                         <field name="fuel_type"/>
                         <field name="quality_type" readonly="1"/>
+                        <field name="workshop_id"/>
                         <field name="user_id"/>
 
                     </group>

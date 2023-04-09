@@ -48,6 +48,7 @@
         'views/available_technician.xml',
         'views/Job_controller.xml',
         'views/job_order_task.xml',
+        'views/account_move.xml',
         # 'views/Job technician_state.xml',
         # 'views/quality_analysis.xml',
         # 'views/quality_analysis2.xml',

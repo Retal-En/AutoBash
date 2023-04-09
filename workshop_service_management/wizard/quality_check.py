@@ -30,6 +30,7 @@ class QualityCheck(models.TransientModel):
                         # 'registration_no': workshop.fleet_id.registration_no,
                         'model_year': workshop.fleet_id.model_year,
                         'quality_type': 'car',
+                        'workshop_id': workshop.id,
                     }
                 quality.create(vals)
 
@@ -60,4 +61,6 @@ class QualityCheck(models.TransientModel):
                     'quality_type': 'paints_and_plumbing',
                 }
                 quality.create(vals)
+        self.workshop_id.write({'state': 'delivery_invoicing'})
+
 

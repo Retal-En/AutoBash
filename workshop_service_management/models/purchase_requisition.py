@@ -7,12 +7,12 @@ from odoo.exceptions import UserError, ValidationError, Warning
 
 
 class PurchaseRequisition(models.Model):
-    _name = 'purchase.requisition'
-    _rec_name = 'sequence'
+    _name = 'requisition.order'
+    _rec_name = 'ref'
     _inherit = ['mail.thread']
     _description = "Fleet Workshop"
     _order = 'id desc'
-    sequence = fields.Char(string='Sequence', required=True, readonly=True, default=lambda self: _('New'))
+    ref = fields.Char(string='Sequence', required=True, readonly=True, default=lambda self: _('New'))
     client_id = fields.Many2one('res.partner', string='Customer', required=True)
     client_phone = fields.Char(string='Phone')
     client_mobile = fields.Char(string='Mobile')
@@ -52,23 +52,24 @@ class PurchaseRequisition(models.Model):
     currency_id = fields.Many2one('res.currency', related="company_id.currency_id",
                                   help='The currency used to enter statement', string="Currency")
     workshop_id = fields.Many2one('fleet.workshop', string="Source Document" ,readonly=True)
-    requisition_line_ids = fields.One2many('purchase.requisition.line', 'purchase_id', string="Purchase")
-    total = fields.Float( compute='_compute_all_price' ,store=True)
+    requisition_ids = fields.One2many('requisition.order.line', 'requisition_id', string="Purchase")
+    total = fields.Float()
     nots = fields.Text(string='Nots')
 
 
-    @api.depends('requisition_line_ids.price_total',)
+    @api.depends('requisition_ids.price_total',)
     def _compute_all_price(self):
-        total=0
-        for line in self.requisition_line_ids:
+        self.total = 0
+        total =0.0
+        for line in self.requisition_ids:
             total += line.price_total
         self.total = total
 
     @api.model
     def create(self, vals):
-        if vals.get('sequence', _('New')) == _('New'):
-            vals['sequence'] = self.env['ir.sequence'].next_by_code(
-                'purchase.requisition') or _('New')
+        if vals.get('ref', _('New')) == _('New'):
+            vals['ref'] = self.env['ir.sequence'].next_by_code(
+                'requisition.order') or _('New')
         res = super(PurchaseRequisition, self).create(vals)
         return res
 
@@ -94,14 +95,14 @@ class PurchaseRequisition(models.Model):
 
     def button_purchase_officer(self):
         line_ids = []
-        for line in self.requisition_line_ids:
+        for line in self.requisition_ids:
             line_ids.append((0, 0, {
             'product_id': line.product_id.id or False,
             'product_qty': line.quantity or 1.0,
             'price_unit': line.price_unit or 0.0,
             }))
-        vals = {'partner_id': self.client_id.id, 'date_order': self.receipt_date, 'partner_ref': self.sequence,
-                'requisition_id':self.id,
+        vals = {'partner_id': self.client_id.id, 'date_order': self.receipt_date, 'partner_ref': self.ref,
+                'requisitions_id':self.id,
                 'workshop_id':self.workshop_id.id,
                 'order_line': line_ids}
         self.env['purchase.order'].sudo().create(vals)
@@ -126,12 +127,12 @@ class PurchaseRequisition(models.Model):
 
 
 class PurchaseRequisitionLine(models.Model):
-    _name = 'purchase.requisition.line'
-    _description = "purchase order line"
+    _name = 'requisition.order.line'
+    _description = "requisition order line"
     _order = 'id desc'
 
     product_id = fields.Many2one('product.product', string='Name', domain=[('detailed_type', '=', 'service')])
-    purchase_id = fields.Many2one('purchase.requisition', string='fleet Purchase')
+    requisition_id = fields.Many2one('requisition.order', string='fleet Purchase')
     name = fields.Text(string='Description')
     default_code = fields.Char(string='Product Code')
     uom_id = fields.Many2one('uom.uom', 'Unit of Measure')
@@ -164,11 +165,11 @@ class PurchaseRequisitionLine(models.Model):
 class PurchaseOrder(models.Model):
     _inherit = 'purchase.order'
     workshop_id = fields.Many2one('fleet.workshop', string="Source Document" ,readonly=True)
-    requisition_id = fields.Many2one('purchase.requisition', string="Source Document" ,readonly=True)
+    requisitions_id = fields.Many2one('requisition.order', string="Source Document" ,readonly=True)
 
     def button_confirm(self):
         res = super(PurchaseOrder, self).button_confirm()
-        if self.requisition_id and  self.requisition_id.purchase_type =='external_service':
+        if self.requisitions_id and  self.requisitions_id.purchase_type =='external_service':
             for line in self.order_line:
                 self.workshop_id.write({'external_order_line':[(0, 0, {
                     'vendor_id': line.partner_id.id ,
@@ -186,11 +187,6 @@ class PurchaseOrder(models.Model):
                     'price_unit': line.price_unit or 0.0,
                     'quantity': line.product_qty or 0.0,
                 })]})
-        self.requisition_id.write({'state':'done'})
+        self.requisitions_id.write({'state':'done'})
         return  res
-
-    # def button_cancel(self):
-    #     res = super(PurchaseOrder, self).button_cancel()
-    #     if self.workshop_id:
-        #     self.workshop_id.external_order_line =  [(5,0,0)]
-        # return res
+#

@@ -21,7 +21,6 @@ class FleetQualityAnalysis(models.Model):
     vin_sn = fields.Char('Chassis Number', help='Unique number written on the vehicle motor (VIN/SN number)')
     model_id = fields.Many2one('fleet.vehicle.model', 'Model', help='Model of the vehicle')
     model_year = fields.Char(string="Model Year ")
-
     quality_type = fields.Selection([
         ('car', 'Car'),
         ('spare_check', 'Spare Check'),
@@ -37,6 +36,7 @@ class FleetQualityAnalysis(models.Model):
         ('done', 'Done')], 'Status', default="draft", readonly=True, copy=False,
         help="Gives the status of the fleet Inspection.")
     user_id = fields.Many2one('res.users', string='Assigned to')
+    workshop_id = fields.Many2one('fleet.workshop', string='Workshop')
     quality_analysis_line = fields.One2many('quality.analysis.line', 'analysis_id', string="Quality")
 
     @api.model
@@ -48,10 +48,19 @@ class FleetQualityAnalysis(models.Model):
         res = super(FleetQualityAnalysis, self).create(vals)
         return res
     def button_confirm(self):
-        pass
+        workshop = self.env['fleet.quality.analysis']
+        if self.workshop_id:
+               m= workshop.search([('workshop_id','=',self.workshop_id.id)])
+               for line in m.filtered(lambda l: l.state not in ('done')):
+                   print("--------------",line.sequence)
+                   self.state = 'done'
+                   if not line:
+                       self.workshop_id.write({'state':'delivery_invoicing'})
+
 
     def button_draft(self):
-        pass
+        for l in self:
+            l.state='draft'
     def button_concel(self):
         pass
 

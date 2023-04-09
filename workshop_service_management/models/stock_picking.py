@@ -49,7 +49,10 @@ class SparePartRequest(models.Model):
         line_ids = []
         if self.source_id:
             spare = self.source_id
-            spare.write({'spare_part_ids': [(0, 0, {
+            spare.write({
+                'location_id': self.location_id.id,
+                'location_des_id': self.location_des_id.id,
+                'spare_part_ids': [(0, 0, {
                 'product_id':line.product_id.id,
                 'uom_id':line.product_uom.id,
                 'quantity':line.quantity_done,
@@ -58,6 +61,11 @@ class SparePartRequest(models.Model):
                         for line in self.spare_ids.filtered(lambda r: r.quantity_done > 0)]
 
                          })
+        if self.stock_picking_id:
+            picking_id =self.stock_picking_id
+        else:
+            picking_id = self.env.ref('stock.picking_type_internal').id,
+
 
         values_for_create = {
             'location_id': self.location_id.id,
@@ -65,7 +73,7 @@ class SparePartRequest(models.Model):
             'partner_id': self.partner_id.id,
             'spare_request_id': self.id,
             'origin': self.name,
-            'picking_type_id': self.stock_picking_id.id,
+            'picking_type_id': picking_id,
             'move_ids_without_package': [(0, 0, {
                 # 'spare_request_line_id': rec.id,
                 'location_id': self.location_id.id,

@@ -12,21 +12,24 @@
                             class="oe_highlight"/>
                     <button name="button_draft" string="set to draft" type="object" class="oe_highlight"
                             states="repar,closed"/>
+                       <button name="button_pre_delivery" string="PRE-DELIVERY " type="object" class="oe_highlight"
+                            states="repar"/>
 
+                    <button name="button_draft" string="5555/555555555555555 up" type="object" />
+                    <button name="pickgin" string="pickgin" type="object" />
 
-                    <button name="button_followup" string="Follow up" type="object" states="closed"
+                    <button name="button_followup" string="Follow up" type="object" states="jet_bus"
                             class="oe_highlight"/>
-                    <button name="button_draft" string="Delivery" type="object" class="oe_highlight" states="closed"/>
+                    <button name="button_delivery_invoicing"  states="delivery_invoicing" string="Delivery" type="object" class="oe_highlight"/>
 
-                    <button name="button_draft" string="PRE-DELIVERY " type="object" class="oe_highlight"
-                            states="closed"/>
+
 
                     <button string="Quality Check" name="%(action_fleet_quality_check)d"
                             context="{'default_workshop_id': active_id}" type="action" class="oe_highlight"
-                            states="closed"/>
+                            states="quality_check"/>
                     <button name="button_cancel" string="Cancel" type="object" states="repar,reception"/>
                     <field name="state" widget="statusbar"
-                           statusbar_visible="reception,repar,quality_check,delivery_invoicing,follow_up,closed"/>
+                           statusbar_visible="reception,repar,quality_check,delivery_invoicing,follow_up,jet_bus,closed"/>
                 </header>
                 <sheet string="Fleet Workshop">
                     <div class="oe_button_box" name="button_box">
@@ -45,7 +48,6 @@
                     <div class="oe_title oe_left">
                         <h1>
                             <field name="sequence"/>
-                            <!--                                                        <field name="attachment_ids" widget="many2many_attachment_preview"/>-->
 
                         </h1>
                     </div>
@@ -168,10 +170,10 @@
                             <group>
                                 <group>
                                     <field name="user_id" invisible="1"/>
-                                    <field name="source_warehouse_id"/>
+                                    <field name="location_id"/>
                                 </group>
                                 <group>
-                                    <field name="warehouse_id"/>
+                                    <field name="location_des_id"/>
                                 </group>
                             </group>
                             <button name="action_create_request_spare_part" string="Spare Part"
@@ -205,9 +207,9 @@
                                    attrs="{'readonly': [('state', '!=', 'draft')]}">
                                 <tree editable="bottom">
                                     <field name="product_id" readonly="1"/>
+                                    <field name="description"/>
                                     <field name="uom_id" readonly="1"/>
                                     <field name="quantity"/>
-                                    <field name="description"/>
                                     <field name="analytic_account_id" optional="hide"/>
                                     <field name="price_total" readonly="1"/>
                                 </tree>
@@ -226,18 +228,16 @@
                                     type="object" class="oe_highlight"/>
 
                             <field name="external_order_line"
-                                   attrs="{'readonly': [('state', '!=', 'draft')]}">
+                              >
                                 <tree editable="bottom">
                                     <field name="vendor_id"/>
                                     <field name="product_id" readonly="1"/>
                                     <field name="name"/>
-                                    <!--                                    <field name="uom_id" readonly="1"/>-->
                                     <field name="quantity"/>
                                     <field name="price_unit"/>
                                     <field name="expected_time"/>
                                     <field name="analytic_account_id" optional="hide"/>
-
-                                    <field name="taxes_id" widget="many2many_tags" readonly="1"/>
+                                    <field name="taxes_id" widget="many2many_tags"/>
                                     <field name="price_total" readonly="1" force_save="1"/>
                                 </tree>
 
@@ -254,25 +254,6 @@
                             <group>
                                 <field name="attachment_ids" widget="many2many_attachment_preview"/>
                             </group>
-                        </page>
-                        <page string="Accounting">
-                            <group>
-                                <group>
-                                    <field name="cash_account_id"/>
-                                    <field name="redo_account_id"/>
-                                    <field name="warranty_account_id"/>
-                                    <field name="workshop_account_id"/>
-                                    <field name="company_cars_account_id"/>
-                                </group>
-                                <group>
-                                    <field name="insurance_account_id"/>
-                                    <field name="promotion_account_id"/>
-                                    <field name="goodwill_account_id"/>
-                                    <field name="sales_used_cars_account_id"/>
-
-                                </group>
-                            </group>
-
                         </page>
                     </notebook>
                     <separator string="Notes"/>

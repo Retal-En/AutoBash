@@ -2,7 +2,7 @@
 <odoo>
     <record id="view_fleet_purchase_requisition_form" model="ir.ui.view">
         <field name="name">fleet.purchase.requisition.form</field>
-        <field name="model">purchase.requisition</field>
+        <field name="model">requisition.order</field>
         <field name="arch" type="xml">
             <form string="Fleet Purchase Requisition">
                 <header>
@@ -22,7 +22,7 @@
                 <sheet string="Fleet Workshop">
                     <div class="oe_title oe_left">
                         <h1>
-                            <field name="sequence"/>
+                            <field name="ref"/>
                         </h1>
                     </div>
                     <group>
@@ -51,24 +51,22 @@
                     </group>
                     <notebook>
                         <page string="Order Line">
-                            <field name="requisition_line_ids"
-                                   attrs="{'readonly': [('state', '!=', 'draft')]}">
+                            <field name="requisition_ids">
                                 <tree editable="bottom">
                                     <field name="product_id"/>
                                     <field name="name"/>
                                     <field name="product_qty" readonly="1"/>
                                     <field name="uom_id"/>
                                     <field name="quantity"/>
-<!--                                    <field name="price_total"/>-->
                                 </tree>
                             </field>
 
-<!--                            <group name="note_group" col="6" class="mt-2 mt-md-0">-->
-<!--                                <group class="oe_subtotal_footer oe_right" colspan="2" name="sale_total">-->
-<!--                                    <field name="total" force_save="1" colspan="2"/>-->
-<!--                                </group>-->
-<!--                                <div class="oe_clear"/>-->
-<!--                            </group>-->
+                            <group name="note_group" col="6" class="mt-2 mt-md-0">
+                                <group class="oe_subtotal_footer oe_right" colspan="2" name="sale_total">
+                                    <field name="total" force_save="1" colspan="2"/>
+                                </group>
+                                <div class="oe_clear"/>
+                            </group>
 
 
                         </page>
@@ -101,10 +99,10 @@
     <!--fleet Workshop Tree View-->
     <record id="view_fleet_purchase_requisition_tree" model="ir.ui.view">
         <field name="name">fleet.purchase.requisition.tree</field>
-        <field name="model">purchase.requisition</field>
+        <field name="model">requisition.order</field>
         <field name="arch" type="xml">
             <tree string="Fleet Workshop">
-                <field name="sequence"/>
+                <field name="ref"/>
                 <field name="client_id"/>
                 <field name="phone"/>
                 <field name="receipt_date"/>
@@ -115,10 +113,10 @@
     </record>
     <record id="view_purchase_requisition_order_filter" model="ir.ui.view">
         <field name="name">fleet.purchase.requisition.list.select</field>
-        <field name="model">purchase.requisition</field>
+        <field name="model">requisition.order</field>
         <field name="arch" type="xml">
             <search string="Search Purchase Requisition Order">
-                <field name="sequence"/>
+                <field name="ref"/>
                 <field name="client_id" operator="child_of"/>
                 <field name="fleet_id"/>
                 <separator/>
@@ -127,7 +125,7 @@
     </record>
     <record id="view_purchase_requisition_order_pivot" model="ir.ui.view">
         <field name="name">fleet.workshop.list.pivot</field>
-        <field name="model">purchase.requisition</field>
+        <field name="model">requisition.order</field>
         <field name="arch" type="xml">
             <pivot string="Purchase Requisition">
                 <field name="client_id" type="row"/>
@@ -138,7 +136,7 @@
     <!--Action-->
     <record model="ir.actions.act_window" id="action_fleet_purchase_requisition_view">
         <field name="name">Purchase Requisition</field>
-        <field name="res_model">purchase.requisition</field>
+        <field name="res_model">requisition.order</field>
         <field name="binding_view_types">form</field>
         <field name="view_mode">tree,form,pivot</field>
         <field name="search_view_id" ref="view_purchase_requisition_order_filter"/>
