@@ -122,8 +122,8 @@ class SaleOrderLine(models.Model):
         default=_get_default_rec_ins)
     rec_in_price = fields.Float('Price2', digits=dp.get_precision('Product Price'), default=0.0,compute='_get_ins_reg_price',store=True)
     other_price = fields.Float('other Price', digits=dp.get_precision('Product Price'), default=0.0)
-    registered = fields.Boolean('Registered',default=False,readonly=True,translate=True)
-    move_to_pdi = fields.Boolean('To PDI',default=False,readonly=True,translate=True)
+    # registered = fields.Boolean('Registered',default=False,readonly=True,translate=True)
+    # move_to_pdi = fields.Boolean('To PDI',default=False,readonly=True,translate=True)
     product_location = fields.Many2one('stock.location', "Product Location" , compute="_get_product_location",store=True)
     order_type = fields.Selection([('car', "Car Order"),('order', "Workshop Order"),],related='order_id.order_type',store=True)
     finance = fields.Float(string="Value", track_visibility='onchange')
@@ -301,7 +301,7 @@ class SaleOrderLine(models.Model):
         # remove the no_variant attributes that don't belong to this template
         for ptav in self.product_no_variant_attribute_value_ids:
             if ptav.product_attribute_value_id not in self.product_id.product_tmpl_id._get_valid_product_attribute_values():
-                self.product_no_variant_product_template_attribute_value_ids -= ptav
+                self.product_no_variant_attribute_value_ids -= ptav
 
         vals = {}
         quants = self.env['stock.quant'].search([('location_id.usage','=', 'internal'),('product_id', '=', self.product_id.id),('quantity','>',0),('product_state','not in', ['hold','is_block'])])
@@ -487,7 +487,8 @@ class SaleOrderLine(models.Model):
                     'price_subtotal': taxes['total_excluded'],
                 })
 
-    @api.depends('product_id','lot_id','registered','move_to_pdi')
+    @api.depends('product_id','lot_id')
+    # @api.depends('product_id','lot_id','registered','move_to_pdi')
     def _get_product_location(self):
         for rec in self:
             if rec.lot_id and rec.product_id.is_car:
@@ -499,7 +500,7 @@ class SaleOrderLine(models.Model):
     def _get_cash_price(self, product):
         Pricelist = self.env['product.pricelist'].search([('payment_method','=','cash')], order='id DESC',limit=1)
         no_variant_attributes_price_extra = [
-            ptav.price_extra for ptav in self.product_no_variant_product_template_attribute_value_ids.filtered(
+            ptav.price_extra for ptav in self.product_no_variant_attribute_value_ids.filtered(
                 lambda ptav:
                     ptav.price_extra and
                     ptav not in product.product_template_product_template_attribute_value_ids

@@ -216,6 +216,9 @@ class SaleOrder(models.Model):
                 elif sdp.fixed_down_payment == False:
                     if sdp.amount_total:
                         sdp.total_down_payment = sdp.amount_total * sdp.down_payment_percentage / 100
+            else:
+                sdp.total_down_payment = sdp.amount_total
+
 
     @api.depends('total_down_payment', 'down_payment_percentage', 'down_payment_fixed')
     def _compute_remaining_amount(self):
@@ -274,16 +277,194 @@ class SaleOrder(models.Model):
             # move_id.state = 'posted'
             self.write({'state': 'approval'})
 
+    def send_to_approve(self):
+        for rec in self:
+            if rec.approve_line.filtered(lambda r: r.state != 'cancel'):
+                raise UserError(_(
+                    'An approve order already exists.'))
+            config = self.env['service.config'].search([], order='date DESC', limit=1)
+            # registration_product = rec.order_line.filtered(lambda line: line.product_id == config.rec_product)
+            # insurance_product = rec.order_line.filtered(lambda line: line.product_id == config.ins_product)
+            # if rec.order_line.filtered(
+            #         lambda line: line.registration in ['out', 'include']) and not registration_product:
+            #     raise UserError(_(
+            #         'please add registration in SO.'))
+            # if rec.order_line.filtered(lambda line: line.insurance in ['out', 'include']) and not insurance_product:
+            #     raise UserError(_(
+            #         'please add insurance in SO.'))
+            finance_amount = 0.0
+            if not rec.order_line:
+                raise UserError(_(
+                    'There is no invoiceable line,please make sure that a product has been selected.'))
+            approve = self.env['sale.order.approval'].create({
+                'sale_id': rec.id,
+                'order_reference': self.name,
+                'customer': rec.partner_id.id,
+                'payment_method': rec.payment_method,
+                'salesperson': rec.user_id.id,
+                'order_date': rec.date_order,
+            })
+            print('approveghkgh', approve)
+            """ Registration  and  Insurance Price """
+            for line in rec.order_line:
+                if line.product_id.is_car == 'is_car':
+                    registration_price = 0.0
+                    insurance_price = 0.0
+                    finance = 0.0
+                    down_payment = 0.0
+                    discount = 0.0
+                    discount_amount = 0.0
+                    finance_value = self.env['finance.config'].search([], order='id DESC', limit=1).value
+
+                    product = line.product_id.with_context(
+                        lang=line.order_id.partner_id.lang,
+                        partner=line.order_id.partner_id,
+                        quantity=line.product_uom_qty,
+                        date=line.order_id.date_order,
+                        pricelist=line.order_id.pricelist_id.id,
+                        uom=line.product_uom.id
+                    )
+                    if line.registration == 'include':
+                        registration_price = line.product_id.registration_price * line.product_uom_qty
+                    elif line.registration in ['out', 'self']:
+                        registration_price = 0.0
+
+                    if line.insurance == 'include':
+                        insurance_price = line.product_id.insurance_price * line.product_uom_qty
+                    elif line.insurance in ['out', 'self']:
+                        insurance_price = 0.0
+                    # print('ins', insurance_price,rec.registration,line.product_id.insurance_price)
+
+                    """ Unit Price , Vat and  Showroom Price"""
+                    # showroom_price = line.product_id.lst_price*line.product_uom_qty
+                    showroom_price = (
+                        self.env['account.tax']._fix_tax_included_price_company(line._get_cash_price(product),
+                                                                                product.taxes_id, line.tax_id,
+                                                                                line.company_id))
+                    selling_price = line.price_unit * line.product_uom_qty
+                    unit_price = selling_price / 1.17
+                    vat = unit_price * 0.17
+
+                    if rec.payment_method == 'cash':
+                        """ Discount """
+
+                        if (showroom_price / 1.17) - unit_price > 0:
+                            discount_amount = (showroom_price / 1.17) - unit_price
+                            # print(showroom_price / 1.17, unit_price, discount_amount , 'ggggghhhhhhwwwwww')
+                            discount = (discount_amount / (showroom_price / 1.17)) * 100
+                        if registration_price > 0.0 and insurance_price > 0.0:
+                            discount_amount2 = registration_price + insurance_price
+                            discount_amount += discount_amount2
+                            # print(discount_amount)
+                            discount2 = (discount_amount2 / (showroom_price + discount_amount2)) * 100
+                            discount += discount2
+                        vals = {
+                            'name': self.name,
+                            'order_id': self.id,
+                            'approve_id': approve.id,
+                            'product_id': line.product_id.id or False,
+                            'brand_id': line.product_id.brand_id.id,
+                            'model_year': line.product_id.model_year,
+                            'product_qty': line.product_uom_qty,
+                            'showroom_price': showroom_price,
+                            'selling_price': selling_price,
+                            'unit_price': unit_price,
+                            'vat': vat,
+                            'discount_amount': discount_amount,
+                            'discount': discount,
+                            'insurance': insurance_price,
+                            'registration': registration_price,
+                            'line_id': line.id,
+                        }
+                        self.env['sale.approve.line'].create(vals)
+
+                    elif rec.payment_method == 'installment':
+                        # cash_price = (self.env['account.tax']._fix_tax_included_price_company(line._get_cash_price(product),product.taxes_id, line.tax_id, line.company_id))*line.product_uom_qty
+                        cash_price = line.product_id.lst_price * line.product_uom_qty
+                        finance2 = selling_price - cash_price - insurance_price - registration_price
+                        finance = selling_price - cash_price
+                        if finance <= 0:
+                            finance = 0.0
+                        else:
+                            finance_amount += finance
+                        unit_price = (selling_price - finance) / 1.17
+                        vat = unit_price * 0.17
+                        down_payment = (line.down_payment * line.product_uom_qty) / (unit_price + vat) * 100
+
+                        """ Discount """
+                        basic_finance = ((
+                                                 cash_price / line.product_uom_qty - line.down_payment) * line.finance * line.no_ofmanth) * line.product_uom_qty
+                        if basic_finance - finance2 > 0:
+                            discount_amount = basic_finance - finance2
+                            discount = (discount_amount / (cash_price + basic_finance)) * 100
+                            if insurance_price > 0.0 or registration_price > 0.0:
+                                discount = (discount_amount / (
+                                        cash_price + basic_finance + insurance_price + registration_price)) * 100
+                        else:
+                            discount_amount = 0.0
+
+                        vals = {
+                            'name': self.name,
+                            'order_id': self.id,
+                            'approve_id': approve.id,
+                            'product_id': line.product_id.id or False,
+                            'brand_id': line.product_id.brand_id.id,
+                            'model_year': line.product_id.model_year,
+                            'product_qty': line.product_uom_qty,
+                            'showroom_price': cash_price,
+                            'selling_price': selling_price,
+                            'unit_price': unit_price,
+                            'vat': vat,
+                            'discount_amount': discount_amount,
+                            'discount': discount,
+                            'insurance': insurance_price,
+                            'registration': registration_price,
+                            'finance': finance,
+                            'down_payment': down_payment,
+                            'no_ofmanth': line.no_ofmanth,
+                            'line_id': line.id,
+                        }
+                        self.env['sale.approve.line'].create(vals)
+
+                    elif rec.payment_method == 'crf':
+                        crf_price = self.env['account.tax']._fix_tax_included_price_company(
+                            line._get_display_price(product), product.taxes_id, line.tax_id,
+                            line.company_id) * line.product_uom_qty
+                        if (crf_price - selling_price) > 0:
+                            discount_amount = crf_price - selling_price
+                            discount = (discount_amount / crf_price) * 100
+                        else:
+                            discount_amount = 0.0
+                            discount = 0.0
+                        vals = {
+                            'name': self.name,
+                            'order_id': self.id,
+                            'approve_id': approve.id,
+                            'product_id': line.product_id.id or False,
+                            'brand_id': line.product_id.brand_id.id,
+                            'model_year': line.product_id.model_year,
+                            'product_qty': line.product_uom_qty,
+                            'crf_price': crf_price,
+                            'selling_price': selling_price,
+                            'discount_amount': discount_amount,
+                            'discount': discount,
+                            'line_id': line.id,
+                        }
+                        self.env['sale.approve.line'].create(vals)
+                rec.state = 'approval'
+                rec.finance_amount = finance_amount
+
+     
     # def send_to_approve(self):
     #     for rec in self:
     #         if rec.approve_line.filtered(lambda r: r.state != 'cancel'):
     #             raise UserError(_(
     #                 'An approve order already exists.'))
+
     #         config = self.env['service.config'].search([], order='date DESC', limit=1)
     #         # registration_product = rec.order_line.filtered(lambda line: line.product_id == config.rec_product)
     #         # insurance_product = rec.order_line.filtered(lambda line: line.product_id == config.ins_product)
-    #         # if rec.order_line.filtered(
-    #         #         lambda line: line.registration in ['out', 'include']) and not registration_product:
+    #         # if rec.order_line.filtered(lambda line: line.registration in ['out', 'include']) and not registration_product:
     #         #     raise UserError(_(
     #         #         'please add registration in SO.'))
     #         # if rec.order_line.filtered(lambda line: line.insurance in ['out', 'include']) and not insurance_product:
@@ -300,7 +481,7 @@ class SaleOrder(models.Model):
     #             'payment_method': rec.payment_method,
     #             'salesperson': rec.user_id.id,
     #         })
-    #         print('approveghkgh', approve)
+    #         print('approveghkgh',approve)
     #         """ Registration  and  Insurance Price """
     #         for line in rec.order_line:
     #             if line.product_id.is_car == 'is_car':
@@ -315,29 +496,26 @@ class SaleOrder(models.Model):
     #                 product = line.product_id.with_context(
     #                     lang=line.order_id.partner_id.lang,
     #                     partner=line.order_id.partner_id,
-    #                     quantity=line.product_uom_qty,
+    #                     quantity= line.product_uom_qty,
     #                     date=line.order_id.date_order,
     #                     pricelist=line.order_id.pricelist_id.id,
     #                     uom=line.product_uom.id
     #                 )
     #                 if line.registration == 'include':
-    #                     registration_price = line.product_id.registration_price * line.product_uom_qty
+    #                     registration_price = line.product_id.registration_price*line.product_uom_qty
     #                 elif line.registration in ['out', 'self']:
     #                     registration_price = 0.0
 
     #                 if line.insurance == 'include':
-    #                     insurance_price = line.product_id.insurance_price * line.product_uom_qty
+    #                     insurance_price = line.product_id.insurance_price*line.product_uom_qty
     #                 elif line.insurance in ['out', 'self']:
     #                     insurance_price = 0.0
     #                 # print('ins', insurance_price,rec.registration,line.product_id.insurance_price)
 
     #                 """ Unit Price , Vat and  Showroom Price"""
     #                 # showroom_price = line.product_id.lst_price*line.product_uom_qty
-    #                 showroom_price = (
-    #                     self.env['account.tax']._fix_tax_included_price_company(line._get_cash_price(product),
-    #                                                                             product.taxes_id, line.tax_id,
-    #                                                                             line.company_id))
-    #                 selling_price = line.price_unit * line.product_uom_qty
+    #                 showroom_price = (self.env['account.tax']._fix_tax_included_price_company(line._get_display_price(product),product.taxes_id, line.tax_id, line.company_id))
+    #                 selling_price = line.price_unit*line.product_uom_qty
     #                 unit_price = selling_price / 1.17
     #                 vat = unit_price * 0.17
 
@@ -347,19 +525,19 @@ class SaleOrder(models.Model):
     #                     if (showroom_price / 1.17) - unit_price > 0:
     #                         discount_amount = (showroom_price / 1.17) - unit_price
     #                         # print(showroom_price / 1.17, unit_price, discount_amount , 'ggggghhhhhhwwwwww')
-    #                         discount = (discount_amount / (showroom_price / 1.17)) * 100
+    #                         discount = (discount_amount / (showroom_price / 1.17))*100
     #                     if registration_price > 0.0 and insurance_price > 0.0:
     #                         discount_amount2 = registration_price + insurance_price
     #                         discount_amount += discount_amount2
     #                         # print(discount_amount)
-    #                         discount2 = (discount_amount2 / (showroom_price + discount_amount2)) * 100
+    #                         discount2 = (discount_amount2 / (showroom_price + discount_amount2))*100
     #                         discount += discount2
     #                     vals = {
     #                         'name': self.name,
     #                         'order_id': self.id,
     #                         'approve_id': approve.id,
     #                         'product_id': line.product_id.id or False,
-    #                         'brand_id': line.product_id.brand_id.name,
+    #                         'brand': line.product_id.brand.id,
     #                         'model_year': line.product_id.model_year,
     #                         'product_qty': line.product_uom_qty,
     #                         'showroom_price': showroom_price,
@@ -371,12 +549,14 @@ class SaleOrder(models.Model):
     #                         'insurance': insurance_price,
     #                         'registration': registration_price,
     #                         'line_id': line.id,
+    #                         'registration_type': line.registration,
+    #                         'insurance_type': line.insurance,
     #                     }
     #                     self.env['sale.approve.line'].create(vals)
 
     #                 elif rec.payment_method == 'installment':
-    #                     # cash_price = (self.env['account.tax']._fix_tax_included_price_company(line._get_cash_price(product),product.taxes_id, line.tax_id, line.company_id))*line.product_uom_qty
-    #                     cash_price = line.product_id.lst_price * line.product_uom_qty
+    #                     cash_price = (self.env['account.tax']._fix_tax_included_price_company(line._get_display_price(product),product.taxes_id, line.tax_id, line.company_id))*line.product_uom_qty
+    #                     # cash_price = line.product_id.lst_price*line.product_uom_qty
     #                     finance2 = selling_price - cash_price - insurance_price - registration_price
     #                     finance = selling_price - cash_price
     #                     if finance <= 0:
@@ -385,17 +565,16 @@ class SaleOrder(models.Model):
     #                         finance_amount += finance
     #                     unit_price = (selling_price - finance) / 1.17
     #                     vat = unit_price * 0.17
-    #                     down_payment = (line.down_payment * line.product_uom_qty) / (unit_price + vat) * 100
+    #                     down_payment = (line.down_payment*line.product_uom_qty) / (unit_price + vat) * 100
 
     #                     """ Discount """
-    #                     basic_finance = ((
-    #                                              cash_price / line.product_uom_qty - line.down_payment) * line.finance * line.no_ofmanth) * line.product_uom_qty
+    #                     basic_finance = ((cash_price/line.product_uom_qty - line.down_payment) * (line.installment_policy.profit / line.no_ofmanth / 100) * line.no_ofmanth)*line.product_uom_qty
+    #                     print(basic_finance,finance2,'finance2',cash_price,(cash_price/line.product_uom_qty - line.down_payment),line.installment_policy.profit,line.no_ofmanth,line.product_uom_qty)
     #                     if basic_finance - finance2 > 0:
     #                         discount_amount = basic_finance - finance2
-    #                         discount = (discount_amount / (cash_price + basic_finance)) * 100
+    #                         discount = (discount_amount / (cash_price + basic_finance))*100
     #                         if insurance_price > 0.0 or registration_price > 0.0:
-    #                             discount = (discount_amount / (
-    #                                     cash_price + basic_finance + insurance_price + registration_price)) * 100
+    #                             discount = (discount_amount / (cash_price + basic_finance + insurance_price + registration_price)) * 100
     #                     else:
     #                         discount_amount = 0.0
 
@@ -404,7 +583,7 @@ class SaleOrder(models.Model):
     #                         'order_id': self.id,
     #                         'approve_id': approve.id,
     #                         'product_id': line.product_id.id or False,
-    #                         'brand_id': line.product_id.brand_id.name,
+    #                         'brand': line.product_id.brand.id,
     #                         'model_year': line.product_id.model_year,
     #                         'product_qty': line.product_uom_qty,
     #                         'showroom_price': cash_price,
@@ -412,23 +591,23 @@ class SaleOrder(models.Model):
     #                         'unit_price': unit_price,
     #                         'vat': vat,
     #                         'discount_amount': discount_amount,
-    #                         'discount': discount,
+    #                         'discount' : discount,
     #                         'insurance': insurance_price,
     #                         'registration': registration_price,
     #                         'finance': finance,
     #                         'down_payment': down_payment,
     #                         'no_ofmanth': line.no_ofmanth,
     #                         'line_id': line.id,
+    #                         'registration_type': line.registration,
+    #                         'insurance_type': line.insurance,
     #                     }
     #                     self.env['sale.approve.line'].create(vals)
 
     #                 elif rec.payment_method == 'crf':
-    #                     crf_price = self.env['account.tax']._fix_tax_included_price_company(
-    #                         line._get_display_price(product), product.taxes_id, line.tax_id,
-    #                         line.company_id) * line.product_uom_qty
-    #                     if (crf_price - selling_price) > 0:
+    #                     crf_price = self.env['account.tax']._fix_tax_included_price_company(line._get_display_price(product), product.taxes_id, line.tax_id, line.company_id)*line.product_uom_qty
+    #                     if(crf_price - selling_price) > 0:
     #                         discount_amount = crf_price - selling_price
-    #                         discount = (discount_amount / crf_price) * 100
+    #                         discount = (discount_amount/crf_price)*100
     #                     else:
     #                         discount_amount = 0.0
     #                         discount = 0.0
@@ -437,200 +616,25 @@ class SaleOrder(models.Model):
     #                         'order_id': self.id,
     #                         'approve_id': approve.id,
     #                         'product_id': line.product_id.id or False,
-    #                         'brand_id': line.product_id.brand_id.name,
+    #                         'brand': line.product_id.brand.id,
     #                         'model_year': line.product_id.model_year,
     #                         'product_qty': line.product_uom_qty,
     #                         'crf_price': crf_price,
     #                         'selling_price': selling_price,
     #                         'discount_amount': discount_amount,
     #                         'discount': discount,
-    #                         'line_id': line.id,
+    #                         'line_id':line.id,
     #                     }
     #                     self.env['sale.approve.line'].create(vals)
-    #             rec.state = 'approval'
+    #             rec.state = 'sent_approve'
+    #             vals = {
+    #                 'name': rec.name,
+    #                 'sale_order_id': rec.id,
+    #                 'state': rec.state,
+    #                 'date': fields.Datetime.now(),
+    #             }
+    #             self.env['sale.history'].sudo().create(vals)
     #             rec.finance_amount = finance_amount
-
-     
-    def send_to_approve(self):
-        for rec in self:
-            if rec.approve_line.filtered(lambda r: r.state != 'cancel'):
-                raise UserError(_(
-                    'An approve order already exists.'))
-
-            config = self.env['service.config'].search([], order='date DESC', limit=1)
-            # registration_product = rec.order_line.filtered(lambda line: line.product_id == config.rec_product)
-            # insurance_product = rec.order_line.filtered(lambda line: line.product_id == config.ins_product)
-            # if rec.order_line.filtered(lambda line: line.registration in ['out', 'include']) and not registration_product:
-            #     raise UserError(_(
-            #         'please add registration in SO.'))
-            # if rec.order_line.filtered(lambda line: line.insurance in ['out', 'include']) and not insurance_product:
-            #     raise UserError(_(
-            #         'please add insurance in SO.'))
-            finance_amount = 0.0
-            if not rec.order_line:
-                raise UserError(_(
-                    'There is no invoiceable line,please make sure that a product has been selected.'))
-            approve = self.env['sale.order.approval'].create({
-                'sale_id': rec.id,
-                'order_reference': self.name,
-                'customer': rec.partner_id.id,
-                'payment_method': rec.payment_method,
-                'salesperson': rec.user_id.id,
-            })
-            print('approveghkgh',approve)
-            """ Registration  and  Insurance Price """
-            for line in rec.order_line:
-                if line.product_id.is_car == 'is_car':
-                    registration_price = 0.0
-                    insurance_price = 0.0
-                    finance = 0.0
-                    down_payment = 0.0
-                    discount = 0.0
-                    discount_amount = 0.0
-                    finance_value = self.env['finance.config'].search([], order='id DESC', limit=1).value
-
-                    product = line.product_id.with_context(
-                        lang=line.order_id.partner_id.lang,
-                        partner=line.order_id.partner_id,
-                        quantity= line.product_uom_qty,
-                        date=line.order_id.date_order,
-                        pricelist=line.order_id.pricelist_id.id,
-                        uom=line.product_uom.id
-                    )
-                    if line.registration == 'include':
-                        registration_price = line.product_id.registration_price*line.product_uom_qty
-                    elif line.registration in ['out', 'self']:
-                        registration_price = 0.0
-
-                    if line.insurance == 'include':
-                        insurance_price = line.product_id.insurance_price*line.product_uom_qty
-                    elif line.insurance in ['out', 'self']:
-                        insurance_price = 0.0
-                    # print('ins', insurance_price,rec.registration,line.product_id.insurance_price)
-
-                    """ Unit Price , Vat and  Showroom Price"""
-                    # showroom_price = line.product_id.lst_price*line.product_uom_qty
-                    showroom_price = (self.env['account.tax']._fix_tax_included_price_company(line._get_display_price(product),product.taxes_id, line.tax_id, line.company_id))
-                    selling_price = line.price_unit*line.product_uom_qty
-                    unit_price = selling_price / 1.17
-                    vat = unit_price * 0.17
-
-                    if rec.payment_method == 'cash':
-                        """ Discount """
-
-                        if (showroom_price / 1.17) - unit_price > 0:
-                            discount_amount = (showroom_price / 1.17) - unit_price
-                            # print(showroom_price / 1.17, unit_price, discount_amount , 'ggggghhhhhhwwwwww')
-                            discount = (discount_amount / (showroom_price / 1.17))*100
-                        if registration_price > 0.0 and insurance_price > 0.0:
-                            discount_amount2 = registration_price + insurance_price
-                            discount_amount += discount_amount2
-                            # print(discount_amount)
-                            discount2 = (discount_amount2 / (showroom_price + discount_amount2))*100
-                            discount += discount2
-                        vals = {
-                            'name': self.name,
-                            'order_id': self.id,
-                            'approve_id': approve.id,
-                            'product_id': line.product_id.id or False,
-                            'brand': line.product_id.brand.id,
-                            'model_year': line.product_id.model_year,
-                            'product_qty': line.product_uom_qty,
-                            'showroom_price': showroom_price,
-                            'selling_price': selling_price,
-                            'unit_price': unit_price,
-                            'vat': vat,
-                            'discount_amount': discount_amount,
-                            'discount': discount,
-                            'insurance': insurance_price,
-                            'registration': registration_price,
-                            'line_id': line.id,
-                            'registration_type': line.registration,
-                            'insurance_type': line.insurance,
-                        }
-                        self.env['sale.approve.line'].create(vals)
-
-                    elif rec.payment_method == 'installment':
-                        cash_price = (self.env['account.tax']._fix_tax_included_price_company(line._get_display_price(product),product.taxes_id, line.tax_id, line.company_id))*line.product_uom_qty
-                        # cash_price = line.product_id.lst_price*line.product_uom_qty
-                        finance2 = selling_price - cash_price - insurance_price - registration_price
-                        finance = selling_price - cash_price
-                        if finance <= 0:
-                            finance = 0.0
-                        else:
-                            finance_amount += finance
-                        unit_price = (selling_price - finance) / 1.17
-                        vat = unit_price * 0.17
-                        down_payment = (line.down_payment*line.product_uom_qty) / (unit_price + vat) * 100
-
-                        """ Discount """
-                        basic_finance = ((cash_price/line.product_uom_qty - line.down_payment) * (line.installment_policy.profit / line.no_ofmanth / 100) * line.no_ofmanth)*line.product_uom_qty
-                        print(basic_finance,finance2,'finance2',cash_price,(cash_price/line.product_uom_qty - line.down_payment),line.installment_policy.profit,line.no_ofmanth,line.product_uom_qty)
-                        if basic_finance - finance2 > 0:
-                            discount_amount = basic_finance - finance2
-                            discount = (discount_amount / (cash_price + basic_finance))*100
-                            if insurance_price > 0.0 or registration_price > 0.0:
-                                discount = (discount_amount / (cash_price + basic_finance + insurance_price + registration_price)) * 100
-                        else:
-                            discount_amount = 0.0
-
-                        vals = {
-                            'name': self.name,
-                            'order_id': self.id,
-                            'approve_id': approve.id,
-                            'product_id': line.product_id.id or False,
-                            'brand': line.product_id.brand.id,
-                            'model_year': line.product_id.model_year,
-                            'product_qty': line.product_uom_qty,
-                            'showroom_price': cash_price,
-                            'selling_price': selling_price,
-                            'unit_price': unit_price,
-                            'vat': vat,
-                            'discount_amount': discount_amount,
-                            'discount' : discount,
-                            'insurance': insurance_price,
-                            'registration': registration_price,
-                            'finance': finance,
-                            'down_payment': down_payment,
-                            'no_ofmanth': line.no_ofmanth,
-                            'line_id': line.id,
-                            'registration_type': line.registration,
-                            'insurance_type': line.insurance,
-                        }
-                        self.env['sale.approve.line'].create(vals)
-
-                    elif rec.payment_method == 'crf':
-                        crf_price = self.env['account.tax']._fix_tax_included_price_company(line._get_display_price(product), product.taxes_id, line.tax_id, line.company_id)*line.product_uom_qty
-                        if(crf_price - selling_price) > 0:
-                            discount_amount = crf_price - selling_price
-                            discount = (discount_amount/crf_price)*100
-                        else:
-                            discount_amount = 0.0
-                            discount = 0.0
-                        vals = {
-                            'name': self.name,
-                            'order_id': self.id,
-                            'approve_id': approve.id,
-                            'product_id': line.product_id.id or False,
-                            'brand': line.product_id.brand.id,
-                            'model_year': line.product_id.model_year,
-                            'product_qty': line.product_uom_qty,
-                            'crf_price': crf_price,
-                            'selling_price': selling_price,
-                            'discount_amount': discount_amount,
-                            'discount': discount,
-                            'line_id':line.id,
-                        }
-                        self.env['sale.approve.line'].create(vals)
-                rec.state = 'sent_approve'
-                vals = {
-                    'name': rec.name,
-                    'sale_order_id': rec.id,
-                    'state': rec.state,
-                    'date': fields.Datetime.now(),
-                }
-                self.env['sale.history'].sudo().create(vals)
-                rec.finance_amount = finance_amount
 
     def action_to_pdi(self):
 
@@ -643,7 +647,9 @@ class SaleOrder(models.Model):
                 'sale_id': self.id,
                 'car_repair_line': [(0, 0, {
                     'product_id': self.order_line.product_id.id,
-
+                    'brand_id': self.order_line.brand_id.id,
+                    'model_year': self.order_line.model_year,
+                    # 'fuel_type': self.order_line.product_id.fuel,
                 })]
             })
         # self.write({'state':'pdi'}) #From Workshop Madule    Neeed Review
@@ -651,14 +657,18 @@ class SaleOrder(models.Model):
     def action_to_contract(self):
         contract_obj = self.env['sale.contract']
         for rec in self:
-            contracts_id = contract_obj.create({
-                'order_reference': self.name,
-                'customer': rec.partner_id.id,
-                # 'payment_method': rec.payment_method,
-                # 'salesperson' : rec.user_id.id,
-                'down_payment_amount': rec.total_down_payment,
-                'sale_id': self.id,
-            })
+            for line in rec.order_line:
+                contracts_id = contract_obj.create({
+                    'order_reference': self.name,
+                    'customer': rec.partner_id.id,
+                    # 'payment_method': rec.payment_method,
+                    # 'salesperson' : rec.user_id.id,
+                    'down_payment_amount': rec.total_down_payment,
+                    'sale_id': self.id,
+                    'total_amount': line.price_subtotal,
+                    # 'down_payment_amount': line.price_subtotal,
+                    'product_id': line.product_id.name,
+                })
         self.write({'state': 'contract'})
 
     def get_approval(self):
@@ -729,9 +739,9 @@ class SaleOrderApproval(models.Model):
     total_discount_amount = fields.Float(string="Total Discount Amount")
     #  1-3-2023
     approve_lines = fields.One2many('sale.approve.line', 'approve_id', string='Approves')
-    total_discount = fields.Float('Total Discount Amount', compute='_get_total_discount', digits=(12, 3))
-    total_amount = fields.Float('Total Amount', compute='_get_total', digits=(12, 3))
-    total_discount_pre = fields.Float('Total Discount', compute='_get_total_amount_discount', digits=(12, 3))
+    total_discount = fields.Float('Total Discount Amount', compute='_get_total_discount', digits=(12, 3),store=True)
+    total_amount = fields.Float('Total Amount', compute='_get_total', digits=(12, 3),store=True)
+    total_discount_pre = fields.Float('Discount Percentage %', compute='_get_total_amount_discount', digits=(12, 3),store=True)
     company_id = fields.Many2one('res.company', 'Company',
                                  default=lambda self: self.env['res.company']._company_default_get(
                                      'sale.order.approval'))
@@ -750,6 +760,12 @@ class SaleOrderApproval(models.Model):
         for rec in self:
             for line in rec.approve_lines:
                 rec.total_discount += line.discount_amount
+
+    @api.depends('approve_lines.discount')
+    def _get_total_amount_discount(self):
+        for rec in self:
+            for line in rec.approve_lines:
+                rec.total_discount_pre += line.discount
 
     @api.depends('approve_lines.selling_price', 'approve_lines.vat')
     def _get_total(self):
