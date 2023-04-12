@@ -13,24 +13,24 @@
 
             <xpath expr="//button[@name='action_view_invoice']" position="after">
                 <button class="oe_stat_button" type="object" name="get_approval"
-                        icon="fa-check-square-o">
-                    <field string="Approval" name="approval_count" widget="statinfo"/>
+                        icon="fa-check-square-o" attrs="{'invisible': [('order_type','=','order')]}">
+                    <field string="Approval" name="approval_count" widget="statinfo" attrs="{'invisible': [('order_type','=','order')]}"/>
                 </button>
                 <button class="oe_stat_button" type="object" name="get_contract"
-                        icon="fa-file-text-o">
-                    <field string="Contract" name="contract_count" widget="statinfo"/>
+                        icon="fa-file-text-o" attrs="{'invisible': [('order_type','=','order')]}">
+                    <field string="Contract" name="contract_count" widget="statinfo" attrs="{'invisible': [('order_type','=','order')]}"/>
                 </button>
                 <button class="oe_stat_button" type="object" name="get_installment"
-                        icon="fa-money">
-                    <field string="Installment" name="installment_count" widget="statinfo"/>
+                        icon="fa-money" attrs="{'invisible': [('order_type','=','order')]}">
+                    <field string="Installment" name="installment_count" widget="statinfo" attrs="{'invisible': [('order_type','=','order')]}"/>
                 </button>
                 <button class="oe_stat_button" type="object" name="get_pdi"
-                        icon="fa-car">
+                        icon="fa-car" attrs="{'invisible': [('order_type','=','order')]}">
                     <field string="PDI" name="pdi_count" widget="statinfo"/>
                 </button>
                 <button class="oe_stat_button" type="object" name="get_insurance"
-                        icon="fa-car">
-                    <field string="Insurance" name="insurance_count" widget="statinfo"/>
+                        icon="fa-car" attrs="{'invisible': [('order_type','=','order')]}"> 
+                    <field string="Insurance" name="insurance_count" widget="statinfo" attrs="{'invisible': [('order_type','=','order')]}"/>
                 </button>
 
             </xpath>
@@ -46,7 +46,7 @@
 
             <xpath expr="//header/field[@name='state']" position="replace">
                 <field name="state" widget="statusbar"
-                       statusbar_visible="draft,approval,sale,pdi,insurance,contract,delivery"/>
+                       statusbar_visible="draft,approval,sale,pdi,insurance,contract,delivery" attrs="{'invisible': [('order_type','=','order')]}"/>
             </xpath>
 
             <xpath expr="//header/button[@name='action_confirm']" position="attributes">
@@ -54,20 +54,20 @@
             </xpath>
 
             <xpath expr="//header/button[@name='action_confirm']" position="after">
-                <button name="send_to_approve" string="To Approve" type="object" widget="oe_highlight"/>
+                <button name="send_to_approve" string="To Approve" type="object" widget="oe_highlight" attrs="{'invisible': [('order_type','=','order')]}"/>
                 <button name="action_to_pdi" string="To PDI Warehouse" type="object" widget="oe_highlight"
-                        icon="fa-car"/>
-                <button name="action_to_contract" string="Create Contract" type="object" widget="oe_highlight"/>
+                        icon="fa-car" attrs="{'invisible': [('order_type','=','order')]}"/>
+                <button name="action_to_contract" string="Create Contract" type="object" widget="oe_highlight" attrs="{'invisible': [('order_type','=','order')]}"/>
 
             </xpath>
             <field name="partner_id" position="after">
-                <field name="payment_method"/>
+                <field name="payment_method" attrs="{'invisible': [('order_type','=','order')]}"/>
                 <field name="total_down_payment" attrs="{'invisible': [('payment_method', '!=', 'installment')]}"/>
                 <field name="remaining_amount" attrs="{'invisible': [('payment_method', '!=', 'installment')]}"/>
                 <field name="total_monthly_installment"
                        attrs="{'invisible': [('payment_method', '!=', 'installment')]}"/>
                 <!--1-3-2023-->
-                <field name="amount_registration" invisible="0"/>
+                <field name="amount_registration" invisible="0" />
                 <field name="amount_insurance" invisible="0"/>
                                 <field name="order_type" invisible="0" />
                                     <field name="choose" invisible="1"/>
@@ -77,21 +77,21 @@
 
             </field>
             <field name="payment_term_id" position="after"> <!--  22-2-2023-->
-                <field name="down_payment_percentage" attrs="{'invisible': [('fixed_down_payment', '=', True)]}"/>
+                <field name="down_payment_percentage" attrs="{'invisible': [('fixed_down_payment', '=', True),('order_type','=','order')]}"/>
                 <field name="fixed_down_payment"/>
-                <field name="down_payment_fixed" attrs="{'invisible': [('fixed_down_payment', '!=', True)]}"/>
-                <field name="number_of_installment"/>
+                <field name="down_payment_fixed" attrs="{'invisible': [('fixed_down_payment', '!=', True),('order_type','=','order')]}"/>
+                <field name="number_of_installment" attrs="{'invisible': [('order_type','=','order')]}"/>
 
             </field>
             <xpath expr="//notebook/page[@name='order_lines']" position="after">
-                <page string="Installments" name="installment" attrs="{'invisible': [('payment_method', '=', 'cash')]}">
+                <page string="Installments" name="installment" attrs="{'invisible': [('payment_method', '=', 'cash'),('order_type','=','order')]}">
                     <group col="4">
                         <field name="bank_name"/>
                         <field name="bank_branch"/>
                         <field name="date_start"/>
                         <field name="pdc_number"/>
                     </group>
-                    <button name="create_installment" string="Create Installments" type="object" widget="oe_highlight"/>
+                    <button name="create_installment" string="Create Installments" type="object" widget="oe_highlight" attrs="{'invisible': [('order_type','=','order')]}"/>
                 </page>
             </xpath>
         </field>
@@ -213,6 +213,12 @@
     </record>
 
     <!--Action-->
+    <record model="ir.actions.act_window" id="action_sales_order_car">
+        <field name="name">Car Order</field>
+        <field name="res_model">sale.order</field>
+        <field name="domain">[('order_type', '=', 'car')]</field>
+        <field name="view_mode">tree,form</field>
+    </record>
     <record model="ir.actions.act_window" id="action_sales_order_approval">
         <field name="name">Sales Order Approval</field>
         <field name="res_model">sale.order.approval</field>
@@ -220,6 +226,12 @@
     </record>
 
     <!--Menuitems-->
+    <menuitem
+            name="Car Order"
+            id="sale_order_car_menu"
+            parent="sale.sale_menu_root"
+            sequence="1"
+            action="action_sales_order_car"/>
     <menuitem
             id="sale_order_approval_menu"
             parent="sale.sale_menu_root"

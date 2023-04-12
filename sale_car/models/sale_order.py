@@ -68,7 +68,7 @@ class SaleOrder(models.Model):
     discount_amount = fields.Float('Discount Amount', digits=dp.get_precision('Account'))
     finance_amount = fields.Float('Finance Amount', digits=dp.get_precision('Account'))
 
-    order_type = fields.Selection([('car', "Car Order"), ('order', "Workshop Order"), ], default=False,
+    order_type = fields.Selection([('car', "Car Order"), ('order', "Workshop Order"), ], default='order',
                                    help="Technical field for UX purpose.")
     @api.model
     def _default_finance(self):
